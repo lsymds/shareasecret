@@ -4,6 +4,7 @@
  * @returns {string} A string consisting of the encrypted secret, salt, and IV.
  */
 function encrypt(plainText) {
+    return plainText;
 }
 
 /**
@@ -12,6 +13,7 @@ function encrypt(plainText) {
  * @param {string} password The plaintext password to attempt to decrypt the ciphertext with.
  */
 function decrypt(cipherText, password) {
+    return cipherText;
 }
 
 export {

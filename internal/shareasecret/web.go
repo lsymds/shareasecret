@@ -2,22 +2,33 @@ package shareasecret
 
 import "net/http"
 
-type httpServer struct {
-	application *Application
+// mapRoutes maps all HTTP routes for the application.
+func (a *Application) mapRoutes() {
+	fs := http.FileServer(http.Dir("./static/"))
+	a.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
+
+	a.router.HandleFunc("/", a.handleGetIndex).Methods("GET")
+	a.router.HandleFunc("/secret", a.handleCreateSecret).Methods("POST")
+	a.router.HandleFunc("/secret/{secretId}", a.handleGetSecret).Methods("GET")
+	a.router.HandleFunc("/secret/{secretId}/view", a.handleReadSecret).Methods("GET")
+	a.router.HandleFunc("/manage-secret/{managementId}", a.handleManageSecret).Methods("GET")
+	a.router.HandleFunc("/manage-secret/{managementId}", a.handleDeleteSecret).Methods("DELETE")
 }
 
-// ServeHTTP implements the http.Handler interface for the Application struct, allowing it to be used as the core handler
-// of a HTTP server.
-func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) error {
-	return nil
+func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	a.router.ServeHTTP(w, r)
 }
 
-func (h *httpServer) handleGetIndex(w http.ResponseWriter, r *http.Request) {}
+func (a *Application) handleGetIndex(w http.ResponseWriter, r *http.Request) {
+	pageIndex().Render(r.Context(), w)
+}
 
-func (h *httpServer) handleCreateSecret(w http.ResponseWriter, r *http.Request) {}
+func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request) {}
 
-func (h *httpServer) handleDeleteSecret(w http.ResponseWriter, r *http.Request) {}
+func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {}
 
-func (h *httpServer) handleGetSecret(w http.ResponseWriter, r *http.Request) {}
+func (a *Application) handleReadSecret(w http.ResponseWriter, r *http.Request) {}
 
-func (h *httpServer) handleReadSecret(w http.ResponseWriter, r *http.Request) {}
+func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request) {}
+
+func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request) {}
