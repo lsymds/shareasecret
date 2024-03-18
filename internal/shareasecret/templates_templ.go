@@ -31,7 +31,7 @@ func layout() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script type=\"module\">\n                import { Application, Controller } from \"https://unpkg.com/@hotwired/stimulus/dist/stimulus.js\"\n                window.Stimulus = Application.start()\n            </script><script type=\"module\" src=\"/static/js/create_secret_controller.mjs\"></script></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script type=\"module\" src=\"/static/js/crypto.mjs\"></script><script type=\"module\">\n                import { Application, Controller } from \"https://unpkg.com/@hotwired/stimulus/dist/stimulus.js\"\n                window.Stimulus = Application.start()\n            </script><script type=\"module\" src=\"/static/js/create_secret_controller.mjs\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -61,7 +61,7 @@ func pageIndex() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main><div><h1>index</h1></div><form data-controller=\"createSecret\"><input type=\"hidden\" name=\"encrypted_secret\" data-createSecret-target=\"encryptedSecret\"> <textarea placeholder=\"Secret\" data-createSecret-target=\"plaintextSecret\"></textarea><div><input data-createSecret-target=\"password\" type=\"text\" name=\"password\" placeholder=\"A password used to encrypt the secret\"> <select name=\"ttl\" data-createSecret-target=\"ttl\"><option value=\"30\">30 Minutes</option> <option value=\"60\">1 Hour</option> <option value=\"180\">3 Hours</option> <option value=\"720\">12 Hours</option> <option value=\"1440\">1 Day</option> <option value=\"4320\">3 Days</option> <option value=\"10080\">7 Days</option></select></div><button data-action=\"createSecret#encryptAndSubmit\">Create</button></form></main>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main><div><h1>index</h1></div><form data-controller=\"createSecret\"><input type=\"hidden\" name=\"encrypted_secret\" data-createSecret-target=\"encryptedSecret\"> <textarea placeholder=\"Secret\" data-createSecret-target=\"plaintextSecret\"></textarea><div><input data-createSecret-target=\"password\" type=\"text\" name=\"password\" placeholder=\"A password used to encrypt the secret\"> <select name=\"ttl\" data-createSecret-target=\"ttl\"><option value=\"30\">30 Minutes</option> <option value=\"60\">1 Hour</option> <option value=\"180\">3 Hours</option> <option value=\"720\">12 Hours</option> <option value=\"1440\">1 Day</option> <option value=\"4320\">3 Days</option> <option value=\"10080\">7 Days</option></select></div><button data-action=\"createSecret#encryptAndSubmit\">Create</button> <textarea disabled data-createSecret-target=\"encryptedSecretDisplay\"></textarea></form></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
