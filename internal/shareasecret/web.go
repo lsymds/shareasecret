@@ -1,6 +1,9 @@
 package shareasecret
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 // mapRoutes maps all HTTP routes for the application.
 func (a *Application) mapRoutes() {
@@ -23,7 +26,9 @@ func (a *Application) handleGetIndex(w http.ResponseWriter, r *http.Request) {
 	pageIndex().Render(r.Context(), w)
 }
 
-func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request) {}
+func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("creating a secret")
+}
 
 func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {}
 

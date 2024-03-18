@@ -23,7 +23,7 @@ func layout() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>shareasecret - share encrypted secrets with others</title></head><body>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>shareasecret - share encrypted secrets with others</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/style.css\"></head><body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -31,7 +31,7 @@ func layout() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script type=\"module\" src=\"/static/js/crypto.mjs\"></script><script type=\"module\">\n                import { Application, Controller } from \"https://unpkg.com/@hotwired/stimulus/dist/stimulus.js\"\n                window.Stimulus = Application.start()\n            </script><script type=\"module\" src=\"/static/js/create_secret_controller.mjs\"></script></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"https://unpkg.com/htmx.org@1.9.11\" integrity=\"sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0\" crossorigin=\"anonymous\"></script><script type=\"module\" src=\"/static/js/crypto.mjs\"></script><script type=\"module\">\n                import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.13.7/dist/module.esm.js';\n                import CreateSecretForm from '/static/js/create_secret_form.mjs';\n\n                window.Alpine = Alpine;\n                window.Alpine.data('createSecretForm', CreateSecretForm);\n                window.Alpine.start();\n            </script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -61,7 +61,7 @@ func pageIndex() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main><div><h1>index</h1></div><form data-controller=\"createSecret\"><input type=\"hidden\" name=\"encrypted_secret\" data-createSecret-target=\"encryptedSecret\"> <textarea placeholder=\"Secret\" data-createSecret-target=\"plaintextSecret\"></textarea><div><input data-createSecret-target=\"password\" type=\"text\" name=\"password\" placeholder=\"A password used to encrypt the secret\"> <select name=\"ttl\" data-createSecret-target=\"ttl\"><option value=\"30\">30 Minutes</option> <option value=\"60\">1 Hour</option> <option value=\"180\">3 Hours</option> <option value=\"720\">12 Hours</option> <option value=\"1440\">1 Day</option> <option value=\"4320\">3 Days</option> <option value=\"10080\">7 Days</option></select></div><button data-action=\"createSecret#encryptAndSubmit\">Create</button> <textarea disabled data-createSecret-target=\"encryptedSecretDisplay\"></textarea></form></main>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main><div><h1>index</h1></div><form x-data=\"createSecretForm\" hx-post=\"/secret\" hx-params=\"not plainTextSecret,password\" hx-trigger=\"createSecret\"><input type=\"hidden\" name=\"encryptedSecret\" x-model=\"encryptedSecret\"> <textarea name=\"plainTextSecret\" placeholder=\"Secret\" x-model=\"plaintextSecret\"></textarea><div><input type=\"text\" name=\"password\" placeholder=\"A password used to encrypt the secret\" x-model=\"password\"> <select name=\"ttl\" data-createSecret-target=\"ttl\"><option value=\"30\">30 Minutes</option> <option value=\"60\">1 Hour</option> <option value=\"180\">3 Hours</option> <option value=\"720\">12 Hours</option> <option value=\"1440\">1 Day</option> <option value=\"4320\">3 Days</option> <option value=\"10080\">7 Days</option></select></div><span x-text=\"encryptedSecret\"></span> <span x-text=\"plaintextSecret\"></span> <span x-text=\"encryptedSecret\"></span> <button @click=\"encryptAndSubmit\">Create</button></form></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
