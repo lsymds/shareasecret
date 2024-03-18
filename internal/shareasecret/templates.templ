@@ -11,11 +11,11 @@ templ layout() {
 			{ children... }
 			<script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0" crossorigin="anonymous"></script>
 			<script type="module">
-                import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.13.7/dist/module.esm.js';
-                import CreateSecretForm from '/static/js/create_secret_form.mjs';
+                import Alpine from "https://cdn.jsdelivr.net/npm/alpinejs@3.13.7/dist/module.esm.js";
+                import CreateSecretForm from "/static/js/create_secret_form.mjs";
 
                 window.Alpine = Alpine;
-                window.Alpine.data('createSecretForm', CreateSecretForm);
+                window.Alpine.data("createSecretForm", CreateSecretForm);
                 window.Alpine.start();
             </script>
 		</body>

@@ -8,10 +8,10 @@ async function encrypt(plainText, password) {
     const enc = new TextEncoder();
     const salt = window.crypto.getRandomValues(new Uint8Array(16));
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
-    const encryptionKey = await _keyFromPassword(password, salt, 'encrypt');
+    const encryptionKey = await _keyFromPassword(password, salt, "encrypt");
 
     const cipherText = await window.crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv },
+        { name: "AES-GCM", iv },
         encryptionKey,
         enc.encode(plainText)
     );
@@ -30,7 +30,7 @@ async function decrypt(cipherText, password) {
         return;
     }
 
-    const encryptionComponents = cipherText.split('.');
+    const encryptionComponents = cipherText.split(".");
     if (encryptionComponents.length !== 3) {
         return;
     }
@@ -40,10 +40,10 @@ async function decrypt(cipherText, password) {
     const salt = _base64StringToArrayBuffer(saltText);
     const iv = _base64StringToArrayBuffer(ivText);
 
-    const decryptionKey = await _keyFromPassword(password, salt, 'decrypt');
+    const decryptionKey = await _keyFromPassword(password, salt, "decrypt");
 
     const decryptedBuffer = await window.crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv },
+        { name: "AES-GCM", iv },
         decryptionKey,
         encryptedContent
     );
@@ -58,26 +58,26 @@ async function decrypt(cipherText, password) {
  * @param {string} use What the derived key will be used for.
  * @returns {Promise<CryptoKey>} The created key.
  */
-async function _keyFromPassword(password, salt, use = 'encrypt') {
+async function _keyFromPassword(password, salt, use = "encrypt") {
     const enc = new TextEncoder();
 
     const material = await window.crypto.subtle.importKey(
-      'raw',
+      "raw",
       enc.encode(password),
-      'PBKDF2',
+      "PBKDF2",
       false,
-      ['deriveKey']
+      ["deriveKey"]
     );
 
     const derivedKey = await window.crypto.subtle.deriveKey(
       {
-        name: 'PBKDF2',
+        name: "PBKDF2",
         salt,
         iterations: 600000,
-        hash: 'SHA-256'
+        hash: "SHA-256"
       },
       material,
-      { name: 'AES-GCM', length: 256 },
+      { name: "AES-GCM", length: 256 },
       false,
       [use]
     );
@@ -93,7 +93,7 @@ async function _keyFromPassword(password, salt, use = 'encrypt') {
 function _arrayBufferToBase64String(buffer) {
     const binary = Array.prototype.map
         .call(buffer, (byte) => String.fromCharCode(byte))
-        .join('');
+        .join("");
 
     return btoa(binary);
 }
