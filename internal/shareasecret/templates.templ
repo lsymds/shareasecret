@@ -9,7 +9,8 @@ templ layout() {
 		</head>
 		<body>
 			{ children... }
-			<script type="module" src="/static/js/create_secret_form.mjs"></script>
+			<script type="module" src="/static/js/index_page.mjs"></script>
+			<script type="module" src="/static/js/view_secret_page.mjs"></script>
 		</body>
 	</html>
 }
@@ -46,6 +47,20 @@ templ pageIndex() {
 				<button>
 					Create
 				</button>
+			</form>
+		</main>
+	}
+}
+
+templ pageViewSecret(cipherText string, err string) {
+	@layout() {
+		<main>
+			<form id="decryptSecretForm">
+				<span id="decryptSecretError">{ err }</span>
+				<input type="hidden" name="cipherText" value={ cipherText }/>
+				<textarea name="display" disabled>{ cipherText }</textarea>
+				<input type="password" name="password"/>
+				<button>Decrypt</button>
 			</form>
 		</main>
 	}

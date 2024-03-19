@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 // mapRoutes maps all HTTP routes for the application.
@@ -18,9 +20,9 @@ func (a *Application) mapRoutes() {
 	a.router.HandleFunc("/", a.handleGetIndex).Methods("GET")
 	a.router.HandleFunc("/nojs", a.handleNoJavascriptNotice).Methods("GET")
 	a.router.HandleFunc("/secret", a.handleCreateSecret).Methods("POST")
-	a.router.HandleFunc("/secret/{secretId}", a.handleGetSecret).Methods("GET")
-	a.router.HandleFunc("/manage-secret/{managementId}", a.handleManageSecret).Methods("GET")
-	a.router.HandleFunc("/manage-secret/{managementId}", a.handleDeleteSecret).Methods("DELETE")
+	a.router.HandleFunc("/secret/{secretID}", a.handleGetSecret).Methods("GET")
+	a.router.HandleFunc("/manage-secret/{managementID}", a.handleManageSecret).Methods("GET")
+	a.router.HandleFunc("/manage-secret/{managementID}", a.handleDeleteSecret).Methods("DELETE")
 }
 
 func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -60,13 +62,13 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 
 	// create the secret, and generate two cryptographically random, 256 bit identifiers to use for viewing and
 	// management of the secret respectively
-	viewingId, err := randomSecureId()
+	viewingID, err := randomSecureId()
 	if err != nil {
 		internalServerError("Unable to create the secret. Please try again.", w)
 		return
 	}
 
-	managingId, err := randomSecureId()
+	managingID, err := randomSecureId()
 	if err != nil {
 		internalServerError("Unable to create the secret. Please try again.", w)
 		return
@@ -74,11 +76,13 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 
 	if _, err := a.db.db.Exec(
 		`
-			INSERT INTO secrets (view_id, manage_id, cipher_text, ttl, alive_until, created_at)
-			VALUES (?, ?, ?, ?, ?, ?)
+			INSERT INTO
+				secrets (view_id, manage_id, cipher_text, ttl, alive_until, created_at)
+			VALUES
+				(?, ?, ?, ?, ?, ?)
 		`,
-		viewingId,
-		managingId,
+		viewingID,
+		managingID,
 		secret,
 		ttl,
 		time.Now().Add(time.Duration(ttl)*time.Minute).UnixMilli(),
@@ -89,10 +93,34 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 	}
 
 	// redirect the user to the manage secrets page
-	http.Redirect(w, r, fmt.Sprintf("/manage-secret/%s", managingId), http.StatusCreated)
+	http.Redirect(w, r, fmt.Sprintf("/manage-secret/%s", managingID), http.StatusCreated)
 }
 
-func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {}
+func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
+	secretID := mux.Vars(r)["secretID"]
+
+	// retrieve the cipher text for the relevant secret, or return an error if that secret cannot be found
+	var cipherText string
+
+	if err := a.db.db.QueryRow(
+		`
+			SELECT
+				cipher_text
+			FROM
+				secrets
+			WHERE
+				view_id = ? AND
+				alive_until > ?
+		`,
+		secretID,
+		time.Now().UnixMilli(),
+	).Scan(&cipherText); err != nil {
+		pageViewSecret("", "Secret does not exist or has expired.").Render(r.Context(), w)
+		return
+	}
+
+	pageViewSecret(cipherText, "").Render(r.Context(), w)
+}
 
 func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request) {}
 

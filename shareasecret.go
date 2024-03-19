@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	application, err := shareasecret.NewApplication("file:foobar?mode=memory&cache=shared")
+	application, err := shareasecret.NewApplication("file:shareasecret.db")
 	if err != nil {
 		panic(err)
 	}
