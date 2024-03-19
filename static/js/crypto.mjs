@@ -4,7 +4,7 @@
  * @param {string} password The password to use to encrypt the text.
  * @returns {Promise<string>} A string consisting of the encrypted secret, salt, and IV.
  */
-async function encrypt(plainText, password) {
+export async function encrypt(plainText, password) {
     const enc = new TextEncoder();
     const salt = window.crypto.getRandomValues(new Uint8Array(16));
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
@@ -25,7 +25,7 @@ async function encrypt(plainText, password) {
  * @param {string} password The plaintext password to attempt to decrypt the ciphertext with.
  * @returns {Promise<string>} The decrypted text.
  */
-async function decrypt(cipherText, password) {
+export async function decrypt(cipherText, password) {
     if (!cipherText) {
         return;
     }
@@ -105,9 +105,4 @@ function _arrayBufferToBase64String(buffer) {
  */
 function _base64StringToArrayBuffer(str) {
     return Uint8Array.from(atob(str), c => c.charCodeAt(0))
-}
-
-export {
-    encrypt,
-    decrypt
 }
