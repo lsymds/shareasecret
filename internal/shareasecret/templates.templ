@@ -9,39 +9,29 @@ templ layout() {
 		</head>
 		<body>
 			{ children... }
-			<script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0" crossorigin="anonymous"></script>
-			<script type="module">
-                import Alpine from "https://cdn.jsdelivr.net/npm/alpinejs@3.13.7/dist/module.esm.js";
-                import CreateSecretForm from "/static/js/create_secret_form.mjs";
-
-                window.Alpine = Alpine;
-                window.Alpine.data("createSecretForm", CreateSecretForm);
-                window.Alpine.start();
-            </script>
+			<script type="module" src="/static/js/create_secret_form.mjs"></script>
 		</body>
 	</html>
 }
 
 templ pageIndex() {
 	@layout() {
+		<noscript>
+			<meta http-equiv="refresh" content="0;url=/nojs"/>
+		</noscript>
 		<main>
 			<div>
 				<h1>index</h1>
 			</div>
-			<form
-				x-data="createSecretForm"
-				hx-post="/secret"
-				hx-params="not plainTextSecret,password"
-				hx-trigger="createSecret"
-			>
-				<input type="hidden" name="encryptedSecret" x-model="encryptedSecret"/>
-				<textarea name="plainTextSecret" placeholder="Secret" x-model="plaintextSecret"></textarea>
+			<form id="createSecretForm">
+				<span id="createSecretError"></span>
+				<input type="hidden" name="encryptedSecret"/>
+				<textarea name="plaintextSecret" placeholder="Secret"></textarea>
 				<div>
 					<input
 						type="text"
 						name="password"
 						placeholder="A password used to encrypt the secret"
-						x-model="password"
 					/>
 					<select name="ttl">
 						<option value="30">30 Minutes</option>
@@ -53,7 +43,7 @@ templ pageIndex() {
 						<option value="10080">7 Days</option>
 					</select>
 				</div>
-				<button @click="encryptAndSubmit">
+				<button>
 					Create
 				</button>
 			</form>

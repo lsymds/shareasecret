@@ -1,17 +1,37 @@
 import { encrypt } from "./crypto.mjs";
 
-export default function() {
-    return {
-        plaintextSecret: "",
-        password: "",
-        encryptedSecret: "",
+document.addEventListener("DOMContentLoaded", function() {
+    const createSecretForm = document.getElementById("createSecretForm");
+    if (!createSecretForm) {
+        return;
+    }
 
-        async encryptAndSubmit(e) {
+    createSecretForm
+        .querySelector("button")
+        .addEventListener("click", async function (e) {
             e.preventDefault();
 
-            this.encryptedSecret = await encrypt(this.plaintextSecret, this.password);
-            await this.$nextTick();
-            window.htmx.trigger(this.$el, "createSecret");
-        }
-    }
-}
+            const errorContainer = createSecretForm.querySelector("#createSecretError");
+
+            const plaintextSecret = createSecretForm.querySelector("textarea[name=plaintextSecret]").value;
+            const password = createSecretForm.querySelector("input[name=password]").value;
+
+            const requestData = new URLSearchParams();
+            requestData.append("ttl", createSecretForm.querySelector("select[name=ttl]").value);
+            requestData.append("encryptedSecret", await encrypt(plaintextSecret, password));
+
+            const response = await fetch(
+                "/secret",
+                {
+                    method: "POST",
+                    body: requestData,
+                }
+            );
+
+            if (response.status === 201) {
+                window.location.href = response.headers.get("Location");
+            } else {
+                errorContainer.innerHTML = await response.text();
+            }
+        });
+});
