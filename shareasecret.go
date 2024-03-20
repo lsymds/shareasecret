@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	application, err := shareasecret.NewApplication("file:shareasecret.db")
+	application, err := shareasecret.NewApplication("file:shareasecret.db", "http://127.0.0.1:8994")
 	if err != nil {
 		panic(err)
 	}

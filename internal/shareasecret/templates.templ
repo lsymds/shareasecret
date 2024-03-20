@@ -1,5 +1,10 @@
 package shareasecret
 
+type notifications struct {
+	errorMsg   string
+	successMsg string
+}
+
 templ layout() {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -15,7 +20,7 @@ templ layout() {
 	</html>
 }
 
-templ pageIndex() {
+templ pageIndex(c notifications) {
 	@layout() {
 		<noscript>
 			<meta http-equiv="refresh" content="0;url=/nojs"/>
@@ -24,6 +29,12 @@ templ pageIndex() {
 			<div>
 				<h1>index</h1>
 			</div>
+			if c.errorMsg != "" {
+				<span>{ c.errorMsg }</span>
+			}
+			if c.successMsg != "" {
+				<span>Success: { c.successMsg }</span>
+			}
 			<form id="createSecretForm">
 				<span id="createSecretError"></span>
 				<input type="hidden" name="encryptedSecret"/>
@@ -52,15 +63,26 @@ templ pageIndex() {
 	}
 }
 
-templ pageViewSecret(cipherText string, err string) {
+templ pageViewSecret(cipherText string, c notifications) {
 	@layout() {
 		<main>
 			<form id="decryptSecretForm">
-				<span id="decryptSecretError">{ err }</span>
+				<span id="decryptSecretError">{ c.errorMsg }</span>
 				<input type="hidden" name="cipherText" value={ cipherText }/>
 				<textarea name="display" disabled>{ cipherText }</textarea>
 				<input type="password" name="password"/>
 				<button>Decrypt</button>
+			</form>
+		</main>
+	}
+}
+
+templ pageManageSecret(manageSecretID string, viewSecretURL string, deleteSecretURL string, c notifications) {
+	@layout() {
+		<main>
+			<input disabled type="text" value={ viewSecretURL }/>
+			<form action={ templ.SafeURL(deleteSecretURL) } method="POST">
+				<button>Delete</button>
 			</form>
 		</main>
 	}

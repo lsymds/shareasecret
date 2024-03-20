@@ -20,9 +20,9 @@ func (a *Application) mapRoutes() {
 	a.router.HandleFunc("/", a.handleGetIndex).Methods("GET")
 	a.router.HandleFunc("/nojs", a.handleNoJavascriptNotice).Methods("GET")
 	a.router.HandleFunc("/secret", a.handleCreateSecret).Methods("POST")
-	a.router.HandleFunc("/secret/{secretID}", a.handleGetSecret).Methods("GET")
+	a.router.HandleFunc("/secret/{viewingID}", a.handleGetSecret).Methods("GET")
 	a.router.HandleFunc("/manage-secret/{managementID}", a.handleManageSecret).Methods("GET")
-	a.router.HandleFunc("/manage-secret/{managementID}", a.handleDeleteSecret).Methods("DELETE")
+	a.router.HandleFunc("/manage-secret/{managementID}/delete", a.handleDeleteSecret).Methods("POST")
 }
 
 func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -30,10 +30,11 @@ func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Application) handleGetIndex(w http.ResponseWriter, r *http.Request) {
-	pageIndex().Render(r.Context(), w)
+	pageIndex(notificationsFromRequest(r, w)).Render(r.Context(), w)
 }
 
 func (a *Application) handleNoJavascriptNotice(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("JavaScript is required to access certain parts of this application due to it relying heavily on client side encryption."))
 }
 
 func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request) {
@@ -60,15 +61,15 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
-	// create the secret, and generate two cryptographically random, 256 bit identifiers to use for viewing and
+	// create the secret, and generate two cryptographically random, 192 bit identifiers to use for viewing and
 	// management of the secret respectively
-	viewingID, err := randomSecureId()
+	viewingID, err := secureID()
 	if err != nil {
 		internalServerError("Unable to create the secret. Please try again.", w)
 		return
 	}
 
-	managingID, err := randomSecureId()
+	managementID, err := secureID()
 	if err != nil {
 		internalServerError("Unable to create the secret. Please try again.", w)
 		return
@@ -77,12 +78,12 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 	if _, err := a.db.db.Exec(
 		`
 			INSERT INTO
-				secrets (view_id, manage_id, cipher_text, ttl, alive_until, created_at)
+				secrets (viewing_id, management_id, cipher_text, ttl, expires_at, created_at)
 			VALUES
 				(?, ?, ?, ?, ?, ?)
 		`,
 		viewingID,
-		managingID,
+		managementID,
 		secret,
 		ttl,
 		time.Now().Add(time.Duration(ttl)*time.Minute).UnixMilli(),
@@ -93,11 +94,11 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 	}
 
 	// redirect the user to the manage secrets page
-	http.Redirect(w, r, fmt.Sprintf("/manage-secret/%s", managingID), http.StatusCreated)
+	http.Redirect(w, r, fmt.Sprintf("/manage-secret/%s", managementID), http.StatusCreated)
 }
 
 func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
-	secretID := mux.Vars(r)["secretID"]
+	viewingID := mux.Vars(r)["viewingID"]
 
 	// retrieve the cipher text for the relevant secret, or return an error if that secret cannot be found
 	var cipherText string
@@ -109,22 +110,64 @@ func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
 			FROM
 				secrets
 			WHERE
-				view_id = ? AND
-				alive_until > ?
+				viewing_id = ? AND
+				expires_at > ?
 		`,
-		secretID,
+		viewingID,
 		time.Now().UnixMilli(),
 	).Scan(&cipherText); err != nil {
-		pageViewSecret("", "Secret does not exist or has expired.").Render(r.Context(), w)
+		setFlashErr("Secret does not exist or has been deleted.", w)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
-	pageViewSecret(cipherText, "").Render(r.Context(), w)
+	pageViewSecret(cipherText, notificationsFromRequest(r, w)).Render(r.Context(), w)
 }
 
-func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request) {}
+func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request) {
+	managementID := mux.Vars(r)["managementID"]
 
-func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request) {}
+	// retrieve the ID in order to view and decrypt the secret, or return an error if that secret cannot be found
+	var secretID string
+
+	if err := a.db.db.QueryRow(
+		`
+			SELECT
+				viewing_id
+			FROM
+				secrets
+			WHERE
+				management_id = ? AND
+				expires_at > ?
+		`,
+		managementID,
+		time.Now().UnixMilli(),
+	).Scan(&secretID); err != nil {
+		setFlashErr("Secret does not exist or has been deleted.", w)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	pageManageSecret(
+		managementID,
+		fmt.Sprintf("%s/secret/%s", a.baseURL, secretID),
+		fmt.Sprintf("%s/manage-secret/%s/delete", a.baseURL, managementID),
+		notificationsFromRequest(r, w),
+	).Render(r.Context(), w)
+}
+
+func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request) {
+	managementID := mux.Vars(r)["managementID"]
+
+	// delete the secret, returning the user to the manage secret page with an error message if that fails
+	if _, err := a.db.db.Exec("DELETE FROM secrets WHERE management_id = ?", managementID); err != nil {
+		setFlashErr("Secret does not exist or has been deleted.", w)
+		http.Redirect(w, r, fmt.Sprintf("/manage-secret/%s", managementID), http.StatusSeeOther)
+	}
+
+	setFlashSuccess("Secret successfully deleted.", w)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
 
 func badRequest(err string, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusBadRequest)
@@ -136,8 +179,52 @@ func internalServerError(err string, w http.ResponseWriter) {
 	w.Write([]byte(err))
 }
 
-func randomSecureId() (string, error) {
-	b := make([]byte, 32)
+func setFlashErr(msg string, w http.ResponseWriter) {
+	setFlash("err", msg, w)
+}
+
+func setFlashSuccess(msg string, w http.ResponseWriter) {
+	setFlash("success", msg, w)
+}
+
+func setFlash(name string, msg string, w http.ResponseWriter) {
+	n := fmt.Sprintf("flash_%s", name)
+	http.SetCookie(w, &http.Cookie{Name: n, Value: msg, Path: "/"})
+}
+
+func notificationsFromRequest(r *http.Request, w http.ResponseWriter) notifications {
+	return notifications{
+		errorMsg:   flash("err", r, w),
+		successMsg: flash("success", r, w),
+	}
+}
+
+func flash(name string, r *http.Request, w http.ResponseWriter) string {
+	n := fmt.Sprintf("flash_%s", name)
+
+	// read the cookie, returning an empty string if it doesn't exist
+	c, err := r.Cookie(n)
+	if err != nil {
+		return ""
+	}
+
+	// set a cookie with the same name so it is "expired" within the client's browser
+	http.SetCookie(
+		w,
+		&http.Cookie{
+			Name:    n,
+			Value:   "",
+			Expires: time.Unix(1, 0),
+			MaxAge:  -1,
+			Path:    "/",
+		},
+	)
+
+	return c.Value
+}
+
+func secureID() (string, error) {
+	b := make([]byte, 24)
 
 	if _, err := rand.Read(b); err != nil {
 		return "", err
