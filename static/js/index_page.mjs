@@ -11,7 +11,9 @@ document.addEventListener("DOMContentLoaded", function() {
         .addEventListener("click", async function (e) {
             e.preventDefault();
 
-            const errorContainer = createSecretForm.querySelector("#createSecretError");
+            const errorNotificationContainer = createSecretForm.querySelector(".notifications .notifications__error");
+            errorNotificationContainer.style.display = "none";
+            errorNotificationContainer.innerHTML = "";
 
             const plaintextSecret = createSecretForm.querySelector("textarea[name=plaintextSecret]").value;
             const password = createSecretForm.querySelector("input[name=password]").value;
@@ -33,7 +35,8 @@ document.addEventListener("DOMContentLoaded", function() {
             if (response.status === 201) {
                 window.location.href = response.headers.get("Location");
             } else {
-                errorContainer.innerHTML = await response.text();
+                errorNotificationContainer.style.display = "block";
+                errorNotificationContainer.innerHTML = await response.text();
             }
         });
 });

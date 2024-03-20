@@ -2,13 +2,16 @@ package shareasecret
 
 import (
 	"crypto/rand"
+	"database/sql"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/gorilla/mux"
 )
 
@@ -18,7 +21,10 @@ func (a *Application) mapRoutes() {
 	a.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
 
 	a.router.HandleFunc("/", a.handleGetIndex).Methods("GET")
-	a.router.HandleFunc("/nojs", a.handleNoJavascriptNotice).Methods("GET")
+
+	a.router.Handle("/nojs", templ.Handler(pageNoJavascript())).Methods("GET")
+	a.router.Handle("/oops", templ.Handler(pageOops())).Methods("GET")
+
 	a.router.HandleFunc("/secret", a.handleCreateSecret).Methods("POST")
 	a.router.HandleFunc("/secret/{viewingID}", a.handleGetSecret).Methods("GET")
 	a.router.HandleFunc("/manage-secret/{managementID}", a.handleManageSecret).Methods("GET")
@@ -31,10 +37,6 @@ func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (a *Application) handleGetIndex(w http.ResponseWriter, r *http.Request) {
 	pageIndex(notificationsFromRequest(r, w)).Render(r.Context(), w)
-}
-
-func (a *Application) handleNoJavascriptNotice(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("JavaScript is required to access certain parts of this application due to it relying heavily on client side encryption."))
 }
 
 func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request) {
@@ -103,7 +105,7 @@ func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
 	// retrieve the cipher text for the relevant secret, or return an error if that secret cannot be found
 	var cipherText string
 
-	if err := a.db.db.QueryRow(
+	err := a.db.db.QueryRow(
 		`
 			SELECT
 				cipher_text
@@ -115,9 +117,14 @@ func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
 		`,
 		viewingID,
 		time.Now().UnixMilli(),
-	).Scan(&cipherText); err != nil {
+	).Scan(&cipherText)
+
+	if errors.Is(sql.ErrNoRows, err) {
 		setFlashErr("Secret does not exist or has been deleted.", w)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	} else if err != nil {
+		http.Redirect(w, r, "/oops", http.StatusSeeOther)
 		return
 	}
 
@@ -130,7 +137,7 @@ func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request)
 	// retrieve the ID in order to view and decrypt the secret, or return an error if that secret cannot be found
 	var secretID string
 
-	if err := a.db.db.QueryRow(
+	err := a.db.db.QueryRow(
 		`
 			SELECT
 				viewing_id
@@ -142,9 +149,14 @@ func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request)
 		`,
 		managementID,
 		time.Now().UnixMilli(),
-	).Scan(&secretID); err != nil {
+	).Scan(&secretID)
+
+	if errors.Is(sql.ErrNoRows, err) {
 		setFlashErr("Secret does not exist or has been deleted.", w)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	} else if err != nil {
+		http.Redirect(w, r, "/oops", http.StatusSeeOther)
 		return
 	}
 
@@ -160,9 +172,14 @@ func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request)
 	managementID := mux.Vars(r)["managementID"]
 
 	// delete the secret, returning the user to the manage secret page with an error message if that fails
-	if _, err := a.db.db.Exec("DELETE FROM secrets WHERE management_id = ?", managementID); err != nil {
+	_, err := a.db.db.Exec("DELETE FROM secrets WHERE management_id = ?", managementID)
+	if errors.Is(sql.ErrNoRows, err) {
 		setFlashErr("Secret does not exist or has been deleted.", w)
 		http.Redirect(w, r, fmt.Sprintf("/manage-secret/%s", managementID), http.StatusSeeOther)
+		return
+	} else if err != nil {
+		http.Redirect(w, r, "/oops", http.StatusSeeOther)
+		return
 	}
 
 	setFlashSuccess("Secret successfully deleted.", w)

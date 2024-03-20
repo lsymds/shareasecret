@@ -11,8 +11,9 @@ document.addEventListener("DOMContentLoaded", function() {
         .addEventListener("click", async function(e) {
             e.preventDefault();
 
-            const errorContainer = decryptSecretForm.querySelector("#decryptSecretError");
-            errorContainer.innerHTML = '';
+            const errorNotificationContainer = decryptSecretForm.querySelector(".notifications .notifications__error");
+            errorNotificationContainer.style.display = "none";
+            errorNotificationContainer.innerHTML = "";
 
             const cipherText = decryptSecretForm.querySelector("input[name=cipherText]").value;
             const password = decryptSecretForm.querySelector("input[name=password]").value;
@@ -21,7 +22,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 const decryptedCipherText = await decrypt(cipherText, password);
                 decryptSecretForm.querySelector("textarea[name=display]").value = decryptedCipherText;
             } catch (e) {
-                errorContainer.innerHTML = "Unable to decrypt secret. Have you entered the correct password?";
+                errorNotificationContainer.style.display = "block";
+                errorNotificationContainer.innerHTML = "Unable to decrypt secret. Have you entered the correct password?";
             }
         });
 });

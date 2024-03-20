@@ -29,22 +29,13 @@ templ pageIndex(c notifications) {
 			<div>
 				<h1>index</h1>
 			</div>
-			if c.errorMsg != "" {
-				<span>{ c.errorMsg }</span>
-			}
-			if c.successMsg != "" {
-				<span>Success: { c.successMsg }</span>
-			}
 			<form id="createSecretForm">
+				@componentNotifications(c)
 				<span id="createSecretError"></span>
 				<input type="hidden" name="encryptedSecret"/>
-				<textarea name="plaintextSecret" placeholder="Secret"></textarea>
+				<textarea form="none" name="plaintextSecret" placeholder="Secret"></textarea>
 				<div>
-					<input
-						type="text"
-						name="password"
-						placeholder="A password used to encrypt the secret"
-					/>
+					<input form="none" type="text" name="password" placeholder="A password used to encrypt the secret"/>
 					<select name="ttl">
 						<option value="30">30 Minutes</option>
 						<option value="60">1 Hour</option>
@@ -67,7 +58,7 @@ templ pageViewSecret(cipherText string, c notifications) {
 	@layout() {
 		<main>
 			<form id="decryptSecretForm">
-				<span id="decryptSecretError">{ c.errorMsg }</span>
+				@componentNotifications(c)
 				<input type="hidden" name="cipherText" value={ cipherText }/>
 				<textarea name="display" disabled>{ cipherText }</textarea>
 				<input type="password" name="password"/>
@@ -86,4 +77,46 @@ templ pageManageSecret(manageSecretID string, viewSecretURL string, deleteSecret
 			</form>
 		</main>
 	}
+}
+
+templ pageNoJavascript() {
+	@layout() {
+		<main>
+			<p>
+				The core component of this application (secrets) relies completely on client side encryption enabled by
+				JavaScript. Thus, if your browser does not support JavaScript or if you have it disabled, you will not
+				be able to continue.
+			</p>
+		</main>
+	}
+}
+
+templ pageOops() {
+	@layout() {
+		<main>
+			<p>Oops. Something went wrong. Please try again.</p>
+			<p>If you've hit this error more than once, contact the administrator of this shareasecret instance.</p>
+		</main>
+	}
+}
+
+templ componentNotifications(n notifications) {
+	<div class="notifications">
+		<span
+			class="notifications__error"
+			if n.errorMsg == "" {
+				style="display: none;"
+			}
+		>
+			Error: { n.errorMsg }
+		</span>
+		<span
+			class="notifications__success"
+			if n.successMsg == "" {
+				style="display: none;"
+			}
+		>
+			Success: { n.successMsg }
+		</span>
+	</div>
 }
