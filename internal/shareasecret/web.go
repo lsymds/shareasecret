@@ -67,13 +67,13 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 	// management of the secret respectively
 	viewingID, err := secureID()
 	if err != nil {
-		internalServerError("Unable to create the secret. Please try again.", w)
+		internalServerError(w)
 		return
 	}
 
 	managementID, err := secureID()
 	if err != nil {
-		internalServerError("Unable to create the secret. Please try again.", w)
+		internalServerError(w)
 		return
 	}
 
@@ -91,7 +91,7 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 		time.Now().Add(time.Duration(ttl)*time.Minute).UnixMilli(),
 		time.Now().UnixMilli(),
 	); err != nil {
-		internalServerError("Unable to create the secret. Please try again.", w)
+		internalServerError(w)
 		return
 	}
 
@@ -191,9 +191,8 @@ func badRequest(err string, w http.ResponseWriter) {
 	w.Write([]byte(err))
 }
 
-func internalServerError(err string, w http.ResponseWriter) {
+func internalServerError(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusInternalServerError)
-	w.Write([]byte(err))
 }
 
 func setFlashErr(msg string, w http.ResponseWriter) {

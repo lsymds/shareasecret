@@ -32,6 +32,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
             if (response.status === 201) {
                 window.location.href = response.headers.get("Location");
+            } else if (response.status === 500) {
+                window.location.href = "/oops";
             } else {
                 showErrorNotification(createSecretForm, await response.text());
             }
