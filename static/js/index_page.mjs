@@ -1,4 +1,4 @@
-import { encrypt } from "./crypto.mjs";
+import { clearAndHideNotifications, encrypt, showErrorNotification } from "./core.mjs";
 
 document.addEventListener("DOMContentLoaded", function() {
     const createSecretForm = document.getElementById("createSecretForm");
@@ -11,9 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .addEventListener("click", async function (e) {
             e.preventDefault();
 
-            const errorNotificationContainer = createSecretForm.querySelector(".notifications .notifications__error");
-            errorNotificationContainer.style.display = "none";
-            errorNotificationContainer.innerHTML = "";
+            clearAndHideNotifications(createSecretForm);
 
             const plaintextSecret = createSecretForm.querySelector("textarea[name=plaintextSecret]").value;
             const password = createSecretForm.querySelector("input[name=password]").value;
@@ -35,8 +33,7 @@ document.addEventListener("DOMContentLoaded", function() {
             if (response.status === 201) {
                 window.location.href = response.headers.get("Location");
             } else {
-                errorNotificationContainer.style.display = "block";
-                errorNotificationContainer.innerHTML = await response.text();
+                showErrorNotification(createSecretForm, await response.text());
             }
         });
 });

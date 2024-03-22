@@ -52,6 +52,34 @@ export async function decrypt(cipherText, password) {
 }
 
 /**
+ * Clears and hides the notifications on a given page optionally scoped to a specific element.
+ * @param {Element} scope An optional element to scope the notifications to.
+ */
+export function clearAndHideNotifications(scope) {
+    const el = scope || window;
+    const els = [
+        el.querySelector(".notifications .notifications__error"),
+        el.querySelector(".notifications .notifications__success"),
+    ];
+
+    for (const e of els) {
+        e.style.display = "none";
+        e.innerHTML = "";
+    }
+}
+
+/**
+ * Shows an error notification optionally scoped to a specific parent element.
+ * @param {Element} scope An optional element to scope the notification selection to.
+ * @param {string} err The error to display.
+ */
+export function showErrorNotification(scope, err) {
+    const el = (scope || window).querySelector(".notifications .notifications__error");
+    el.style.display = "block";
+    el.innerHTML = err;
+}
+
+/**
  * Dervies a cryptographically secure encryption key from a password using the PBKDF hashing algorithm.
  * @param {string} password The password to derive the key from.
  * @param {Uint8Array} salt A cryptographically-secure randomly generated salt.

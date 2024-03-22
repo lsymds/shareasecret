@@ -5,7 +5,11 @@ type notifications struct {
 	successMsg string
 }
 
-templ layout() {
+templ script(t string, src string) {
+	<script type={ t } src={ src }></script>
+}
+
+templ layout(footerIncludes []templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -13,18 +17,21 @@ templ layout() {
 			<link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
 		</head>
 		<body>
+			<noscript>
+				<meta http-equiv="refresh" content="0;url=/nojs"/>
+			</noscript>
 			{ children... }
-			<script type="module" src="/static/js/index_page.mjs"></script>
-			<script type="module" src="/static/js/view_secret_page.mjs"></script>
+			if footerIncludes != nil {
+				for _, f := range footerIncludes {
+					@f
+				}
+			}
 		</body>
 	</html>
 }
 
 templ pageIndex(c notifications) {
-	@layout() {
-		<noscript>
-			<meta http-equiv="refresh" content="0;url=/nojs"/>
-		</noscript>
+	@layout([]templ.Component{script("module", "/static/js/index_page.mjs")}) {
 		<main>
 			<div>
 				<h1>index</h1>
@@ -55,7 +62,7 @@ templ pageIndex(c notifications) {
 }
 
 templ pageViewSecret(cipherText string, c notifications) {
-	@layout() {
+	@layout([]templ.Component{script("module", "/static/js/view_secret_page.mjs")}) {
 		<main>
 			<form id="decryptSecretForm">
 				@componentNotifications(c)
@@ -69,7 +76,7 @@ templ pageViewSecret(cipherText string, c notifications) {
 }
 
 templ pageManageSecret(manageSecretID string, viewSecretURL string, deleteSecretURL string, c notifications) {
-	@layout() {
+	@layout(nil) {
 		<main>
 			<input disabled type="text" value={ viewSecretURL }/>
 			<form action={ templ.SafeURL(deleteSecretURL) } method="POST">
@@ -80,7 +87,7 @@ templ pageManageSecret(manageSecretID string, viewSecretURL string, deleteSecret
 }
 
 templ pageNoJavascript() {
-	@layout() {
+	@layout(nil) {
 		<main>
 			<p>
 				The core component of this application (secrets) relies completely on client side encryption enabled by
@@ -92,7 +99,7 @@ templ pageNoJavascript() {
 }
 
 templ pageOops() {
-	@layout() {
+	@layout(nil) {
 		<main>
 			<p>Oops. Something went wrong. Please try again.</p>
 			<p>If you've hit this error more than once, contact the administrator of this shareasecret instance.</p>

@@ -12,5 +12,5 @@ func main() {
 		panic(err)
 	}
 
-	http.ListenAndServe("127.0.0.1:8994", application)
+	panic(http.ListenAndServe("127.0.0.1:8994", application))
 }

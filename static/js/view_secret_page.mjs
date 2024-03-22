@@ -1,4 +1,4 @@
-import { decrypt } from "./crypto.mjs";
+import { clearAndHideNotifications, decrypt, showErrorNotification } from "./core.mjs";
 
 document.addEventListener("DOMContentLoaded", function() {
     const decryptSecretForm = document.getElementById("decryptSecretForm");
@@ -11,9 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .addEventListener("click", async function(e) {
             e.preventDefault();
 
-            const errorNotificationContainer = decryptSecretForm.querySelector(".notifications .notifications__error");
-            errorNotificationContainer.style.display = "none";
-            errorNotificationContainer.innerHTML = "";
+            clearAndHideNotifications(decryptSecretForm);
 
             const cipherText = decryptSecretForm.querySelector("input[name=cipherText]").value;
             const password = decryptSecretForm.querySelector("input[name=password]").value;
@@ -22,8 +20,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 const decryptedCipherText = await decrypt(cipherText, password);
                 decryptSecretForm.querySelector("textarea[name=display]").value = decryptedCipherText;
             } catch (e) {
-                errorNotificationContainer.style.display = "block";
-                errorNotificationContainer.innerHTML = "Unable to decrypt secret. Have you entered the correct password?";
+                showErrorNotification(decryptSecretForm, "Unable to decrypt secret. Have you entered the correct password?");
             }
         });
 });
