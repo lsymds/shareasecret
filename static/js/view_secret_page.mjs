@@ -7,8 +7,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     decryptSecretForm
-        .querySelector("button")
-        .addEventListener("click", async function(e) {
+        .addEventListener("submit", async function(e) {
             e.preventDefault();
 
             clearAndHideNotifications(decryptSecretForm);

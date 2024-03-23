@@ -16,7 +16,7 @@ export async function encrypt(plainText, password) {
         enc.encode(plainText)
     );
 
-    return `${_arrayBufferToBase64String(new Uint8Array(cipherText))}.${_arrayBufferToBase64String(salt)}.${_arrayBufferToBase64String(iv)}`;
+    return `${_arrayToBase64String(new Uint8Array(cipherText))}.${_arrayToBase64String(salt)}.${_arrayToBase64String(iv)}`;
 }
 
 /**
@@ -36,9 +36,9 @@ export async function decrypt(cipherText, password) {
     }
 
     const [encryptedContentText, saltText, ivText] = encryptionComponents;
-    const encryptedContent = _base64StringToArrayBuffer(encryptedContentText);
-    const salt = _base64StringToArrayBuffer(saltText);
-    const iv = _base64StringToArrayBuffer(ivText);
+    const encryptedContent = _base64StringToArray(encryptedContentText);
+    const salt = _base64StringToArray(saltText);
+    const iv = _base64StringToArray(ivText);
 
     const decryptionKey = await _keyFromPassword(password, salt, "decrypt");
 
@@ -118,7 +118,7 @@ async function _keyFromPassword(password, salt, use = "encrypt") {
  * @param {Uint8Array} buffer The buffer to convert each value to a string.
  * @returns {string} A base64 encoded string representation of the buffer.
  */
-function _arrayBufferToBase64String(buffer) {
+function _arrayToBase64String(buffer) {
     const binary = Array.prototype.map
         .call(buffer, (byte) => String.fromCharCode(byte))
         .join("");
@@ -131,6 +131,6 @@ function _arrayBufferToBase64String(buffer) {
  * @param {string} str The base64 encoded string to convert to an array buffer.
  * @returns {Uint8Array}
  */
-function _base64StringToArrayBuffer(str) {
+function _base64StringToArray(str) {
     return Uint8Array.from(atob(str), c => c.charCodeAt(0))
 }
