@@ -13,12 +13,15 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/gorilla/mux"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 // mapRoutes maps all HTTP routes for the application.
 func (a *Application) mapRoutes() {
 	fs := http.FileServer(http.Dir("./static/"))
 	a.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
+	a.router.Use(loggingHandler())
 
 	a.router.HandleFunc("/", a.handleGetIndex).Methods("GET")
 
@@ -35,11 +38,27 @@ func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.router.ServeHTTP(w, r)
 }
 
+func loggingHandler() mux.MiddlewareFunc {
+	return mux.MiddlewareFunc(func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			l := log.With().
+				Str("url", r.URL.String()).
+				Str("method", r.Method)
+
+			r = r.WithContext(l.Logger().WithContext(r.Context()))
+
+			h.ServeHTTP(w, r)
+		})
+	})
+}
+
 func (a *Application) handleGetIndex(w http.ResponseWriter, r *http.Request) {
+	zerolog.Ctx(r.Context()).Info().Msg("testing")
 	pageIndex(notificationsFromRequest(r, w)).Render(r.Context(), w)
 }
 
 func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request) {
+	l := zerolog.Ctx(r.Context())
 	secret := ""
 	ttl := 0
 
@@ -67,12 +86,14 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 	// management of the secret respectively
 	viewingID, err := secureID()
 	if err != nil {
+		l.Err(err).Msg("generating viewing id")
 		internalServerError(w)
 		return
 	}
 
 	managementID, err := secureID()
 	if err != nil {
+		l.Err(err).Msg("generating management id")
 		internalServerError(w)
 		return
 	}
@@ -91,6 +112,7 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 		time.Now().Add(time.Duration(ttl)*time.Minute).UnixMilli(),
 		time.Now().UnixMilli(),
 	); err != nil {
+		l.Err(err).Msg("creating secret")
 		internalServerError(w)
 		return
 	}
@@ -100,6 +122,7 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 }
 
 func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
+	l := zerolog.Ctx(r.Context())
 	viewingID := mux.Vars(r)["viewingID"]
 
 	// retrieve the cipher text for the relevant secret, or return an error if that secret cannot be found
@@ -124,6 +147,7 @@ func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	} else if err != nil {
+		l.Err(err).Str("viewing_id", viewingID).Msg("retrieving secret")
 		http.Redirect(w, r, "/oops", http.StatusSeeOther)
 		return
 	}
@@ -132,6 +156,7 @@ func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request) {
+	l := zerolog.Ctx(r.Context())
 	managementID := mux.Vars(r)["managementID"]
 
 	// retrieve the ID in order to view and decrypt the secret, or return an error if that secret cannot be found
@@ -156,6 +181,7 @@ func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	} else if err != nil {
+		l.Err(err).Str("management_id", managementID).Msg("retrieving secret")
 		http.Redirect(w, r, "/oops", http.StatusSeeOther)
 		return
 	}
@@ -169,6 +195,7 @@ func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request)
 }
 
 func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request) {
+	l := zerolog.Ctx(r.Context())
 	managementID := mux.Vars(r)["managementID"]
 
 	// delete the secret, returning the user to the manage secret page with an error message if that fails
@@ -178,6 +205,7 @@ func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, fmt.Sprintf("/manage-secret/%s", managementID), http.StatusSeeOther)
 		return
 	} else if err != nil {
+		l.Err(err).Str("management_id", managementID).Msg("deleting secret")
 		http.Redirect(w, r, "/oops", http.StatusSeeOther)
 		return
 	}

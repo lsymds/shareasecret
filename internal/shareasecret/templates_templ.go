@@ -132,7 +132,7 @@ func pageIndex(c notifications) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
- 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span id=\"createSecretError\"></span> <input type=\"hidden\" name=\"encryptedSecret\"> <textarea form=\"none\" name=\"plaintextSecret\" placeholder=\"Secret\"></textarea><div><input form=\"none\" type=\"text\" name=\"password\" placeholder=\"A password used to encrypt the secret\"> <select name=\"ttl\"><option value=\"30\">30 Minutes</option> <option value=\"60\">1 Hour</option> <option value=\"180\">3 Hours</option> <option value=\"720\">12 Hours</option> <option value=\"1440\">1 Day</option> <option value=\"4320\">3 Days</option> <option value=\"10080\">7 Days</option></select></div><button type=\"submit\">Create</button></form></main>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span id=\"createSecretError\"></span> <input type=\"hidden\" name=\"encryptedSecret\"> <textarea form=\"none\" name=\"plaintextSecret\" placeholder=\"Secret\"></textarea><div><input form=\"none\" type=\"text\" name=\"password\" placeholder=\"A password used to encrypt the secret\"> <select name=\"ttl\"><option value=\"30\">30 Minutes</option> <option value=\"60\">1 Hour</option> <option value=\"180\">3 Hours</option> <option value=\"720\">12 Hours</option> <option value=\"1440\">1 Day</option> <option value=\"4320\">3 Days</option> <option value=\"10080\">7 Days</option></select></div><button type=\"submit\">Create</button></form></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
