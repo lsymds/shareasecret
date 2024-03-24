@@ -36,7 +36,7 @@ templ layout(footerIncludes []templ.Component) {
 templ pageIndex(c notifications) {
 	@layout([]templ.Component{script("module", "/static/js/index_page.mjs")}) {
 		<main>
-			<div>
+			<section>
 				<h1>create a secret</h1>
 				<p>
 					secrets are encrypted client side (i.e. on your computer) before being persisted on the server.
@@ -47,32 +47,33 @@ templ pageIndex(c notifications) {
 					encryption keys should be as long as possible and contain sufficient entropy. this does
 					<strong>not</strong> mean they have to be randomised or impossible to remember.
 				</p>
-			</div>
-			<form id="createSecretForm" class="create-secret-form">
-				@componentNotifications(c)
-				<input type="hidden" name="encryptedSecret"/>
-				<div class="create-secret-form__field">
-					<label for="plaintextSecret">The text you'd like to make secret: </label>
-					<textarea form="none" name="plaintextSecret"></textarea>
-				</div>
-				<div class="create-secret-form__options">
-					<div class="create-secret-form__options--encryption-key create-secret-form__field">
-						<label for="password">Encryption key:</label>
-						<input form="none" type="text" name="password"/>
-					</div>
+			</section>
+			<section>
+				<form id="createSecretForm" class="create-secret-form">
+					@componentNotifications(c)
+					<input type="hidden" name="encryptedSecret"/>
 					<div class="create-secret-form__field">
-						<label for="ttl">Time until secret expires:</label>
-						<select name="ttl">
-							<option value="30">30 Minutes</option>
-							<option value="60">1 Hour</option>
-							<option value="180">3 Hours</option>
-							<option value="720">12 Hours</option>
-							<option value="1440">1 Day</option>
-							<option value="4320">3 Days</option>
-							<option value="10080">7 Days</option>
-						</select>
+						<label for="plaintextSecret">The text you'd like to make secret: </label>
+						<textarea form="none" name="plaintextSecret"></textarea>
 					</div>
-					<!--
+					<div class="create-secret-form__options">
+						<div class="create-secret-form__options--encryption-key create-secret-form__field">
+							<label for="password">Encryption key:</label>
+							<input form="none" type="text" name="password"/>
+						</div>
+						<div class="create-secret-form__field">
+							<label for="ttl">Time until secret expires:</label>
+							<select name="ttl">
+								<option value="30">30 Minutes</option>
+								<option value="60">1 Hour</option>
+								<option value="180">3 Hours</option>
+								<option value="720">12 Hours</option>
+								<option value="1440">1 Day</option>
+								<option value="4320">3 Days</option>
+								<option value="10080">7 Days</option>
+							</select>
+						</div>
+						<!--
 					<div class="create-secret-form__field">
 						<label for="max_views">Maximum views (0 = unlimited):</label>
 						<input type="number" name="max_views" value="0" min="0" max="100"/>
@@ -82,13 +83,14 @@ templ pageIndex(c notifications) {
 						<input type="text" name="ip_restrictions" placeholder="::1,127.0.0.1"/>
 					</div>
 					-->
-				</div>
-				<div class="create-secret-form__footer">
-					<button type="submit">
-						Encrypt and save
-					</button>
-				</div>
-			</form>
+					</div>
+					<div class="create-secret-form__footer">
+						<button type="submit">
+							Encrypt and save
+						</button>
+					</div>
+				</form>
+			</section>
 		</main>
 	}
 }
