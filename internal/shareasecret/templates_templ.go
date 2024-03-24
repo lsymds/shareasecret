@@ -78,11 +78,15 @@ func layout(footerIncludes []templ.Component) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>shareasecret - share encrypted secrets with others</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/style.css\"></head><body><noscript><meta http-equiv=\"refresh\" content=\"0;url=/nojs\"></noscript>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>shareasecret - share encrypted secrets with others</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/pico.min.css\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/style.css\"></head><body><noscript><meta http-equiv=\"refresh\" content=\"0;url=/nojs\"></noscript><div class=\"container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templ_7745c5c3_Var4.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -124,7 +128,7 @@ func pageIndex(c notifications) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main><div><h1>index</h1></div><form id=\"createSecretForm\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main><div><h1>create a secret</h1><p>secrets are encrypted client side (i.e. on your computer) before being persisted on the server. the unencrypted text is never transmitted over the network and cannot be viewed by anyone unless they know (or guess/bruteforce) the encryption key.</p><p>encryption keys should be as long as possible and contain sufficient entropy. this does <strong>not</strong> mean they have to be randomised or impossible to remember.</p></div><form id=\"createSecretForm\" class=\"create-secret-form\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -132,7 +136,7 @@ func pageIndex(c notifications) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span id=\"createSecretError\"></span> <input type=\"hidden\" name=\"encryptedSecret\"> <textarea form=\"none\" name=\"plaintextSecret\" placeholder=\"Secret\"></textarea><div><input form=\"none\" type=\"text\" name=\"password\" placeholder=\"A password used to encrypt the secret\"> <select name=\"ttl\"><option value=\"30\">30 Minutes</option> <option value=\"60\">1 Hour</option> <option value=\"180\">3 Hours</option> <option value=\"720\">12 Hours</option> <option value=\"1440\">1 Day</option> <option value=\"4320\">3 Days</option> <option value=\"10080\">7 Days</option></select></div><button type=\"submit\">Create</button></form></main>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"hidden\" name=\"encryptedSecret\"><div class=\"create-secret-form__field\"><label for=\"plaintextSecret\">The text you'd like to make secret: </label> <textarea form=\"none\" name=\"plaintextSecret\"></textarea></div><div class=\"create-secret-form__options\"><div class=\"create-secret-form__options--encryption-key create-secret-form__field\"><label for=\"password\">Encryption key:</label> <input form=\"none\" type=\"text\" name=\"password\"></div><div class=\"create-secret-form__field\"><label for=\"ttl\">Time until secret expires:</label> <select name=\"ttl\"><option value=\"30\">30 Minutes</option> <option value=\"60\">1 Hour</option> <option value=\"180\">3 Hours</option> <option value=\"720\">12 Hours</option> <option value=\"1440\">1 Day</option> <option value=\"4320\">3 Days</option> <option value=\"10080\">7 Days</option></select></div><!--\n\t\t\t\t\t<div class=\"create-secret-form__field\">\n\t\t\t\t\t\t<label for=\"max_views\">Maximum views (0 = unlimited):</label>\n\t\t\t\t\t\t<input type=\"number\" name=\"max_views\" value=\"0\" min=\"0\" max=\"100\"/>\n\t\t\t\t\t</div>\n\t\t\t\t\t<div class=\"create-secret-form__field\">\n\t\t\t\t\t\t<label for=\"max_views\">IP restrictions:</label>\n\t\t\t\t\t\t<input type=\"text\" name=\"ip_restrictions\" placeholder=\"::1,127.0.0.1\"/>\n\t\t\t\t\t</div>\n\t\t\t\t\t--></div><div class=\"create-secret-form__footer\"><button type=\"submit\">Encrypt and save</button></div></form></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -186,7 +190,7 @@ func pageViewSecret(cipherText string, c notifications) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(cipherText)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 69, Col: 61}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 101, Col: 61}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -199,7 +203,7 @@ func pageViewSecret(cipherText string, c notifications) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(cipherText)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 70, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 102, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -251,7 +255,7 @@ func pageManageSecret(manageSecretID string, viewSecretURL string, deleteSecretU
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(viewSecretURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 81, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 113, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -394,7 +398,7 @@ func componentNotifications(n notifications) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(n.errorMsg)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 118, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 150, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -417,7 +421,7 @@ func componentNotifications(n notifications) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(n.successMsg)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 126, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 158, Col: 26}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {

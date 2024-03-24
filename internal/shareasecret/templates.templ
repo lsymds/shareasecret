@@ -14,13 +14,16 @@ templ layout(footerIncludes []templ.Component) {
 	<html lang="en">
 		<head>
 			<title>shareasecret - share encrypted secrets with others</title>
+			<link rel="stylesheet" type="text/css" href="/static/css/pico.min.css"/>
 			<link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
 		</head>
 		<body>
 			<noscript>
 				<meta http-equiv="refresh" content="0;url=/nojs"/>
 			</noscript>
-			{ children... }
+			<div class="container">
+				{ children... }
+			</div>
 			if footerIncludes != nil {
 				for _, f := range footerIncludes {
 					@f
@@ -34,28 +37,57 @@ templ pageIndex(c notifications) {
 	@layout([]templ.Component{script("module", "/static/js/index_page.mjs")}) {
 		<main>
 			<div>
-				<h1>index</h1>
+				<h1>create a secret</h1>
+				<p>
+					secrets are encrypted client side (i.e. on your computer) before being persisted on the server.
+					the unencrypted text is never transmitted over the network and cannot be viewed by anyone unless they
+					know (or guess/bruteforce) the encryption key.
+				</p>
+				<p>
+					encryption keys should be as long as possible and contain sufficient entropy. this does
+					<strong>not</strong> mean they have to be randomised or impossible to remember.
+				</p>
 			</div>
-			<form id="createSecretForm">
+			<form id="createSecretForm" class="create-secret-form">
 				@componentNotifications(c)
-				<span id="createSecretError"></span>
 				<input type="hidden" name="encryptedSecret"/>
-				<textarea form="none" name="plaintextSecret" placeholder="Secret"></textarea>
-				<div>
-					<input form="none" type="text" name="password" placeholder="A password used to encrypt the secret"/>
-					<select name="ttl">
-						<option value="30">30 Minutes</option>
-						<option value="60">1 Hour</option>
-						<option value="180">3 Hours</option>
-						<option value="720">12 Hours</option>
-						<option value="1440">1 Day</option>
-						<option value="4320">3 Days</option>
-						<option value="10080">7 Days</option>
-					</select>
+				<div class="create-secret-form__field">
+					<label for="plaintextSecret">The text you'd like to make secret: </label>
+					<textarea form="none" name="plaintextSecret"></textarea>
 				</div>
-				<button type="submit">
-					Create
-				</button>
+				<div class="create-secret-form__options">
+					<div class="create-secret-form__options--encryption-key create-secret-form__field">
+						<label for="password">Encryption key:</label>
+						<input form="none" type="text" name="password"/>
+					</div>
+					<div class="create-secret-form__field">
+						<label for="ttl">Time until secret expires:</label>
+						<select name="ttl">
+							<option value="30">30 Minutes</option>
+							<option value="60">1 Hour</option>
+							<option value="180">3 Hours</option>
+							<option value="720">12 Hours</option>
+							<option value="1440">1 Day</option>
+							<option value="4320">3 Days</option>
+							<option value="10080">7 Days</option>
+						</select>
+					</div>
+					<!--
+					<div class="create-secret-form__field">
+						<label for="max_views">Maximum views (0 = unlimited):</label>
+						<input type="number" name="max_views" value="0" min="0" max="100"/>
+					</div>
+					<div class="create-secret-form__field">
+						<label for="max_views">IP restrictions:</label>
+						<input type="text" name="ip_restrictions" placeholder="::1,127.0.0.1"/>
+					</div>
+					-->
+				</div>
+				<div class="create-secret-form__footer">
+					<button type="submit">
+						Encrypt and save
+					</button>
+				</div>
 			</form>
 		</main>
 	}
