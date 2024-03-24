@@ -32,26 +32,43 @@ button {
   font-size: 14px !important;
 }
 
-  .button--loading {
-      background: red;
+  .button.button--input {
+    --pico-background-color: var(--pico-form-element-background-color);
+    --pico-border-color: var(--pico-form-element-border-color);
+    --pico-color: var(--pico-form-element-color);
+    --pico-box-shadow: none;
+    border: var(--pico-border-width) solid var(--pico-border-color);
+    border-radius: var(--pico-border-radius);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    outline: 0;
+    background-color: var(--pico-background-color);
+    box-shadow: var(--pico-box-shadow);
+    color: var(--pico-color);
+    font-weight: var(--pico-font-weight);
+    transition: background-color var(--pico-transition), border-color var(--pico-transition), color var(--pico-transition), box-shadow var(--pico-transition);
   }
+
+    .button.button--input:hover {
+      background: #F1F1F1;
+    }
 
 .create-secret-form {
 }
 
-    .create-secret-form__options {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 12px;
-    }
+  .create-secret-form .create-secret-form__options {
+      display: grid;
+      grid-template-columns: 1fr;
+  }
 
-        .create-secret-form__options--encryption-key {
-            grid-column-start: 1;
-            grid-column-end: 3;
-        }
+  .create-secret-form .create-secret-form__option-encryption-key {
+      grid-column-start: 1;
+      grid-column-end: 3;
+  }
 
-    .create-secret-form__field {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
+  @media screen and (min-width: 768px) {
+    .create-secret-form .create-secret-form__options {
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
     }
+  }

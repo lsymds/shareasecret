@@ -58,8 +58,8 @@ export async function decrypt(cipherText, password) {
 export function clearAndHideNotifications(scope) {
     const el = scope || window;
     const els = [
-        el.querySelector(".notifications .notifications__error"),
-        el.querySelector(".notifications .notifications__success"),
+        el.querySelector(".notifications .notifications__notification--error"),
+        el.querySelector(".notifications .notifications__notification--success"),
     ];
 
     for (const e of els) {
@@ -74,7 +74,7 @@ export function clearAndHideNotifications(scope) {
  * @param {string} err The error to display.
  */
 export function showErrorNotification(scope, err) {
-    const el = (scope || window).querySelector(".notifications .notifications__error");
+    const el = (scope || window).querySelector(".notifications .notifications__notification--error");
     el.style.display = "block";
     el.innerHTML = err;
 }
