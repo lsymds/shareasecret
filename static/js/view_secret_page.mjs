@@ -12,13 +12,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
             clearAndHideNotifications(decryptSecretForm);
 
-            const cipherText = decryptSecretForm.querySelector("input[name=cipherText]").value;
-            const password = decryptSecretForm.querySelector("input[name=password]").value;
+            const submitButton = decryptSecretForm.querySelector("button");
+            const cipherTextInput = decryptSecretForm.querySelector("input[name=cipherText]");
+            const passwordInput = decryptSecretForm.querySelector("input[name=password]");
+            const decryptedCipherTextInput = decryptSecretForm.querySelector("textarea[name=display]")
 
             try {
-                const decryptedCipherText = await decrypt(cipherText, password);
-                decryptSecretForm.querySelector("textarea[name=display]").value = decryptedCipherText;
+                const decryptedCipherText = await decrypt(cipherTextInput.value, passwordInput.value);
+                decryptedCipherTextInput.value = decryptedCipherText;
+
+                decryptedCipherTextInput.removeAttribute("disabled");
+                decryptedCipherTextInput.focus();
+
+                submitButton.setAttribute("disabled", "true");
+                passwordInput.setAttribute("disabled", "true");
             } catch (e) {
+                console.error(e);
                 showErrorNotification(decryptSecretForm, "Unable to decrypt secret. Have you entered the correct password?");
             }
         });

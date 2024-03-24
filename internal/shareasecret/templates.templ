@@ -95,14 +95,28 @@ templ pageViewSecret(cipherText string, c notifications) {
 		<main>
 			<section>
 				<h1>view secret</h1>
+				<p>
+					enter the encryption key originally used to encrypt this secret to reverse the encrypted cipher text
+					back to its plaintext form.
+				</p>
+				<p>
+					{ "if" } you don't know what the encryption key is/was, get the sender of this link to tell you again.
+					{ "if" } they don't know it, then they'll need to create a new secret with a new password.
+				</p>
 			</section>
 			<section>
 				<form id="decryptSecretForm">
 					@componentNotifications(c)
 					<input type="hidden" name="cipherText" value={ cipherText }/>
-					<textarea name="display" disabled>{ cipherText }</textarea>
-					<input type="password" name="password"/>
-					<button>Decrypt</button>
+					<fieldset>
+						<label for="display">Secret:</label>
+						<textarea name="display" disabled>{ cipherText }</textarea>
+					</fieldset>
+					<fieldset>
+						<label for="password">Encryption Key:</label>
+						<input type="text" name="password" autofocus/>
+					</fieldset>
+					<button type="submit">Decrypt</button>
 				</form>
 			</section>
 		</main>
