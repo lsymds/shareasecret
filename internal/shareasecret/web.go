@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
-	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -20,35 +19,34 @@ import (
 // mapRoutes maps all HTTP routes for the application.
 func (a *Application) mapRoutes() {
 	fs := http.FileServer(http.Dir("./static/"))
-	a.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
-	a.router.Use(loggingHandler())
+	a.router.Handle("GET /static/", http.StripPrefix("/static/", fs))
 
-	a.router.HandleFunc("/", a.handleGetIndex).Methods("GET")
+	a.router.HandleFunc("GET /", a.handleGetIndex)
 
-	a.router.Handle("/nojs", templ.Handler(pageNoJavascript())).Methods("GET")
-	a.router.Handle("/oops", templ.Handler(pageOops())).Methods("GET")
+	a.router.Handle("GET /nojs", templ.Handler(pageNoJavascript()))
+	a.router.Handle("GET /oops", templ.Handler(pageOops()))
 
-	a.router.HandleFunc("/secret", a.handleCreateSecret).Methods("POST")
-	a.router.HandleFunc("/secret/{viewingID}", a.handleGetSecret).Methods("GET")
-	a.router.HandleFunc("/manage-secret/{managementID}", a.handleManageSecret).Methods("GET")
-	a.router.HandleFunc("/manage-secret/{managementID}/delete", a.handleDeleteSecret).Methods("POST")
+	a.router.HandleFunc("POST /secret", a.handleCreateSecret)
+	a.router.HandleFunc("GET /secret/{viewingID}", a.handleGetSecret)
+	a.router.HandleFunc("GET /manage-secret/{managementID}", a.handleManageSecret)
+	a.router.HandleFunc("POST /manage-secret/{managementID}/delete", a.handleDeleteSecret)
 }
 
 func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	a.router.ServeHTTP(w, r)
+	loggingHandler(
+		a.router,
+	).ServeHTTP(w, r)
 }
 
-func loggingHandler() mux.MiddlewareFunc {
-	return mux.MiddlewareFunc(func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			l := log.With().
-				Str("url", r.URL.String()).
-				Str("method", r.Method)
+func loggingHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		l := log.With().
+			Str("url", r.URL.String()).
+			Str("method", r.Method)
 
-			r = r.WithContext(l.Logger().WithContext(r.Context()))
+		r = r.WithContext(l.Logger().WithContext(r.Context()))
 
-			h.ServeHTTP(w, r)
-		})
+		h.ServeHTTP(w, r)
 	})
 }
 
@@ -123,7 +121,7 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 
 func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
 	l := zerolog.Ctx(r.Context())
-	viewingID := mux.Vars(r)["viewingID"]
+	viewingID := r.PathValue("viewingID")
 
 	// retrieve the cipher text for the relevant secret, or return an error if that secret cannot be found
 	var cipherText string
@@ -157,7 +155,7 @@ func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
 
 func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request) {
 	l := zerolog.Ctx(r.Context())
-	managementID := mux.Vars(r)["managementID"]
+	managementID := r.PathValue("managementID")
 
 	// retrieve the ID in order to view and decrypt the secret, or return an error if that secret cannot be found
 	var secretID string
@@ -196,7 +194,7 @@ func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request)
 
 func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request) {
 	l := zerolog.Ctx(r.Context())
-	managementID := mux.Vars(r)["managementID"]
+	managementID := r.PathValue("managementID")
 
 	// delete the secret, returning the user to the manage secret page with an error message if that fails
 	_, err := a.db.db.Exec("DELETE FROM secrets WHERE management_id = ?", managementID)

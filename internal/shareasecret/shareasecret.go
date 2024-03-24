@@ -2,15 +2,14 @@ package shareasecret
 
 import (
 	"fmt"
-
-	"github.com/gorilla/mux"
+	"net/http"
 )
 
 // Application is a wrapper/container for the "ShareASecret" project. All jobs and entry points hang off of this
 // struct.
 type Application struct {
 	db      *database
-	router  *mux.Router
+	router  *http.ServeMux
 	baseURL string
 }
 
@@ -23,7 +22,7 @@ func NewApplication(connectionString string, baseURL string) (*Application, erro
 
 	application := &Application{
 		db:      db,
-		router:  mux.NewRouter(),
+		router:  http.NewServeMux(),
 		baseURL: baseURL,
 	}
 	application.mapRoutes()
