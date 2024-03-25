@@ -51,7 +51,6 @@ func loggingHandler(h http.Handler) http.Handler {
 }
 
 func (a *Application) handleGetIndex(w http.ResponseWriter, r *http.Request) {
-	zerolog.Ctx(r.Context()).Info().Msg("testing")
 	pageIndex(notificationsFromRequest(r, w)).Render(r.Context(), w)
 }
 
