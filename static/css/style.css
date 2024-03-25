@@ -7,9 +7,17 @@ h1 {
 }
 
 .container {
-  width: 720px;
-  margin: 24px;
+  min-width: 400px;
+  padding: 0 12px 12px 12px;
+  margin: 0;
 }
+
+  @media screen and (min-width: 768px) {
+    .container {
+      padding: 0 24px 24px 24px;
+      width: 720px;
+    }
+  }
 
 header {
   display: inline-block !important;
