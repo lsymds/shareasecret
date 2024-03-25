@@ -5,18 +5,20 @@
  * @returns {Promise<string>} A string consisting of the encrypted secret, salt, and IV.
  */
 export async function encrypt(plainText, password) {
-    const enc = new TextEncoder();
-    const salt = window.crypto.getRandomValues(new Uint8Array(16));
-    const iv = window.crypto.getRandomValues(new Uint8Array(12));
-    const encryptionKey = await _keyFromPassword(password, salt, "encrypt");
+	const enc = new TextEncoder();
+	const salt = window.crypto.getRandomValues(new Uint8Array(16));
+	const iv = window.crypto.getRandomValues(new Uint8Array(12));
+	const encryptionKey = await _keyFromPassword(password, salt, "encrypt");
 
-    const cipherText = await window.crypto.subtle.encrypt(
-        { name: "AES-GCM", iv },
-        encryptionKey,
-        enc.encode(plainText)
-    );
+	const cipherText = await window.crypto.subtle.encrypt(
+		{ name: "AES-GCM", iv },
+		encryptionKey,
+		enc.encode(plainText)
+	);
 
-    return `${_arrayToBase64String(new Uint8Array(cipherText))}.${_arrayToBase64String(salt)}.${_arrayToBase64String(iv)}`;
+	return `${_arrayToBase64String(
+		new Uint8Array(cipherText)
+	)}.${_arrayToBase64String(salt)}.${_arrayToBase64String(iv)}`;
 }
 
 /**
@@ -26,29 +28,29 @@ export async function encrypt(plainText, password) {
  * @returns {Promise<string>} The decrypted text.
  */
 export async function decrypt(cipherText, password) {
-    if (!cipherText) {
-        return;
-    }
+	if (!cipherText) {
+		return;
+	}
 
-    const encryptionComponents = cipherText.split(".");
-    if (encryptionComponents.length !== 3) {
-        return;
-    }
+	const encryptionComponents = cipherText.split(".");
+	if (encryptionComponents.length !== 3) {
+		return;
+	}
 
-    const [encryptedContentText, saltText, ivText] = encryptionComponents;
-    const encryptedContent = _base64StringToArray(encryptedContentText);
-    const salt = _base64StringToArray(saltText);
-    const iv = _base64StringToArray(ivText);
+	const [encryptedContentText, saltText, ivText] = encryptionComponents;
+	const encryptedContent = _base64StringToArray(encryptedContentText);
+	const salt = _base64StringToArray(saltText);
+	const iv = _base64StringToArray(ivText);
 
-    const decryptionKey = await _keyFromPassword(password, salt, "decrypt");
+	const decryptionKey = await _keyFromPassword(password, salt, "decrypt");
 
-    const decryptedBuffer = await window.crypto.subtle.decrypt(
-        { name: "AES-GCM", iv },
-        decryptionKey,
-        encryptedContent
-    );
+	const decryptedBuffer = await window.crypto.subtle.decrypt(
+		{ name: "AES-GCM", iv },
+		decryptionKey,
+		encryptedContent
+	);
 
-    return new TextDecoder().decode(decryptedBuffer);
+	return new TextDecoder().decode(decryptedBuffer);
 }
 
 /**
@@ -56,16 +58,16 @@ export async function decrypt(cipherText, password) {
  * @param {Element} scope An optional element to scope the notifications to.
  */
 export function clearAndHideNotifications(scope) {
-    const el = scope || window;
-    const els = [
-        el.querySelector(".notifications .notifications__notification--error"),
-        el.querySelector(".notifications .notifications__notification--success"),
-    ];
+	const el = scope || window;
+	const els = [
+		el.querySelector(".notifications .notifications__notification--error"),
+		el.querySelector(".notifications .notifications__notification--success"),
+	];
 
-    for (const e of els) {
-        e.style.display = "none";
-        e.innerHTML = "";
-    }
+	for (const e of els) {
+		e.style.display = "none";
+		e.innerHTML = "";
+	}
 }
 
 /**
@@ -74,9 +76,11 @@ export function clearAndHideNotifications(scope) {
  * @param {string} err The error to display.
  */
 export function showErrorNotification(scope, err) {
-    const el = (scope || window).querySelector(".notifications .notifications__notification--error");
-    el.style.display = "block";
-    el.innerHTML = err;
+	const el = (scope || window).querySelector(
+		".notifications .notifications__notification--error"
+	);
+	el.style.display = "block";
+	el.innerHTML = err;
 }
 
 /**
@@ -87,30 +91,30 @@ export function showErrorNotification(scope, err) {
  * @returns {Promise<CryptoKey>} The created key.
  */
 async function _keyFromPassword(password, salt, use = "encrypt") {
-    const enc = new TextEncoder();
+	const enc = new TextEncoder();
 
-    const material = await window.crypto.subtle.importKey(
-      "raw",
-      enc.encode(password),
-      "PBKDF2",
-      false,
-      ["deriveKey"]
-    );
+	const material = await window.crypto.subtle.importKey(
+		"raw",
+		enc.encode(password),
+		"PBKDF2",
+		false,
+		["deriveKey"]
+	);
 
-    const derivedKey = await window.crypto.subtle.deriveKey(
-      {
-        name: "PBKDF2",
-        salt,
-        iterations: 600000,
-        hash: "SHA-256"
-      },
-      material,
-      { name: "AES-GCM", length: 256 },
-      false,
-      [use]
-    );
+	const derivedKey = await window.crypto.subtle.deriveKey(
+		{
+			name: "PBKDF2",
+			salt,
+			iterations: 600000,
+			hash: "SHA-256",
+		},
+		material,
+		{ name: "AES-GCM", length: 256 },
+		false,
+		[use]
+	);
 
-    return derivedKey;
+	return derivedKey;
 }
 
 /**
@@ -119,11 +123,11 @@ async function _keyFromPassword(password, salt, use = "encrypt") {
  * @returns {string} A base64 encoded string representation of the buffer.
  */
 function _arrayToBase64String(buffer) {
-    const binary = Array.prototype.map
-        .call(buffer, (byte) => String.fromCharCode(byte))
-        .join("");
+	const binary = Array.prototype.map
+		.call(buffer, (byte) => String.fromCharCode(byte))
+		.join("");
 
-    return btoa(binary);
+	return btoa(binary);
 }
 
 /**
@@ -132,5 +136,5 @@ function _arrayToBase64String(buffer) {
  * @returns {Uint8Array}
  */
 function _base64StringToArray(str) {
-    return Uint8Array.from(atob(str), c => c.charCodeAt(0))
+	return Uint8Array.from(atob(str), (c) => c.charCodeAt(0));
 }
