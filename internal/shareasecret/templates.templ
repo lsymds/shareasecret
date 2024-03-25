@@ -142,7 +142,7 @@ templ pageManageSecret(manageSecretID string, viewSecretURL string, deleteSecret
 					<label for="viewing_url">Viewing URL:</label>
 					<fieldset role="group">
 						<input disabled type="text" name="viewing_url" value={ viewSecretURL }/>
-						<button aria-label="Copy viewing URL" class="button button--input j-button--copy" data-target="viewing_url">
+						<button aria-label="Copy viewing URL" class="input-action j-button--copy" data-target="viewing_url">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
@@ -162,9 +162,12 @@ templ pageManageSecret(manageSecretID string, viewSecretURL string, deleteSecret
 					</fieldset>
 				</fieldset>
 			</section>
-			<section>
+			<section class="manage-secret-page__buttons">
+				<a href="/">
+					<button type="button" class="primary wide">Create another secret</button>
+				</a>
 				<form action={ templ.SafeURL(deleteSecretURL) } method="POST">
-					<button type="submit" class="outline secondary">Delete</button>
+					<button type="submit" class="outline secondary">Delete this secret</button>
 				</form>
 			</section>
 		</main>

@@ -37,7 +37,7 @@ button {
   font-size: 14px !important;
 }
 
-  .button.button--input {
+  button.input-action {
     --pico-background-color: var(--pico-form-element-background-color);
     --pico-border-color: var(--pico-form-element-border-color);
     --pico-color: var(--pico-form-element-color);
@@ -54,9 +54,13 @@ button {
     transition: background-color var(--pico-transition), border-color var(--pico-transition), color var(--pico-transition), box-shadow var(--pico-transition);
   }
 
-    .button.button--input:hover {
+    button.input-action:hover {
       background: #F1F1F1;
     }
+
+  button.wide {
+    width: 100%;
+  }
 
 .create-secret-form {
 }
