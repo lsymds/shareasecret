@@ -98,15 +98,14 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 	if _, err := a.db.db.Exec(
 		`
 			INSERT INTO
-				secrets (viewing_id, management_id, cipher_text, ttl, expires_at, created_at)
+				secrets (viewing_id, management_id, cipher_text, ttl, created_at)
 			VALUES
-				(?, ?, ?, ?, ?, ?)
+				(?, ?, ?, ?, ?)
 		`,
 		viewingID,
 		managementID,
 		secret,
 		ttl,
-		time.Now().Add(time.Duration(ttl)*time.Minute).UnixMilli(),
 		time.Now().UnixMilli(),
 	); err != nil {
 		l.Err(err).Msg("creating secret")
@@ -133,10 +132,9 @@ func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
 				secrets
 			WHERE
 				viewing_id = ? AND
-				expires_at > ?
+				deleted_at IS NULL
 		`,
 		viewingID,
-		time.Now().UnixMilli(),
 	).Scan(&cipherText)
 
 	if errors.Is(sql.ErrNoRows, err) {
@@ -167,10 +165,9 @@ func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request)
 				secrets
 			WHERE
 				management_id = ? AND
-				expires_at > ?
+				deleted_at IS NULL
 		`,
 		managementID,
-		time.Now().UnixMilli(),
 	).Scan(&secretID)
 
 	if errors.Is(sql.ErrNoRows, err) {
@@ -196,12 +193,13 @@ func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request)
 	managementID := r.PathValue("managementID")
 
 	// delete the secret, returning the user to the manage secret page with an error message if that fails
-	_, err := a.db.db.Exec("DELETE FROM secrets WHERE management_id = ?", managementID)
-	if errors.Is(sql.ErrNoRows, err) {
-		setFlashErr("Secret does not exist or has been deleted.", w)
-		http.Redirect(w, r, fmt.Sprintf("/manage-secret/%s", managementID), http.StatusSeeOther)
-		return
-	} else if err != nil {
+	_, err := a.db.db.Exec(
+		"UPDATE secrets SET deleted_at = ?, deletion_reason = ?, cipher_text = NULL WHERE management_id = ?",
+		time.Now().UnixMilli(),
+		deletionReasonUserDeleted,
+		managementID,
+	)
+	if err != nil {
 		l.Err(err).Str("management_id", managementID).Msg("deleting secret")
 		http.Redirect(w, r, "/oops", http.StatusSeeOther)
 		return

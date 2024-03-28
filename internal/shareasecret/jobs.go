@@ -13,7 +13,21 @@ func (a *Application) RunDeleteExpiredSecretsJob() {
 	runJobInBackground(
 		"delete_expired_secrets",
 		func(l zerolog.Logger) error {
-			rows, err := a.db.db.Exec("DELETE FROM secrets WHERE expires_at <= ?", time.Now().UnixMilli())
+			rows, err := a.db.db.Exec(
+				`
+					UPDATE
+						secrets
+					SET
+						deleted_at = ?1,
+						deletion_reason = ?2,
+						cipher_text = NULL
+					WHERE
+						(created_at + (ttl * 60 * 1000)) <= ?1 AND
+						deleted_at IS NULL
+				`,
+				time.Now().UnixMilli(),
+				deletionReasonExpired,
+			)
 			if err != nil {
 				return err
 			}

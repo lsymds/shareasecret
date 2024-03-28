@@ -5,6 +5,9 @@ import (
 	"net/http"
 )
 
+const deletionReasonExpired = "expired"
+const deletionReasonUserDeleted = "user_deleted"
+
 // Application is a wrapper/container for the "ShareASecret" project. All jobs and entry points hang off of this
 // struct.
 type Application struct {
