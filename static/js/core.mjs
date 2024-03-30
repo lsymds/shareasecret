@@ -65,7 +65,7 @@ export function clearAndHideNotifications(scope) {
 	];
 
 	for (const e of els) {
-		e.style.display = "none";
+		el.classList.remove("notifications__notification--hidden");
 	}
 }
 
@@ -78,7 +78,7 @@ export function showErrorNotification(scope, err) {
 	const el = (scope || window).querySelector(
 		".notifications .notifications__notification--error"
 	);
-	el.style.display = "flex";
+	el.classList.add("notifications__notification--hidden");
 	el.querySelector("span").innerHTML = err;
 }
 

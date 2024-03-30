@@ -1,5 +1,7 @@
 :root {
   --pico-font-size: 16px;
+  --pico-icon-chevron: url("/static/images/chevron_icon.svg");
+  --pico-icon-loading: url("/static/images/spinner_icon.svg");
 }
 
 h1 {
@@ -90,6 +92,10 @@ button {
     .notifications .notifications__notification.notifications__notification--error {
       border-left: 6px solid #F5A390;
       color: #861D13;
+    }
+
+    .notifications .notifications__notification.notifications__notification--hidden {
+      display: none;
     }
 
 .create-secret-form {
