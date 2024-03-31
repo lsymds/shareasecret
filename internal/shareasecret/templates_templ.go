@@ -78,7 +78,7 @@ func layout(footerIncludes []templ.Component) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>shareasecret - share encrypted secrets with others</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src &#39;self&#39;\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/pico.min.css\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/style.css\"></head><body><noscript><meta http-equiv=\"refresh\" content=\"0;url=/nojs\"></noscript><a href=\"/\" aria-label=\"navigate to landing page\"><header>shareasecret</header></a><div class=\"container\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><title>shareasecret - share encrypted secrets with others</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"description\" content=\"Client-side encrypted, time limited, opening count restricted shareable links.\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src &#39;self&#39;\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/pico.min.css\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/static/css/style.css\"></head><body><noscript><meta http-equiv=\"refresh\" content=\"0;url=/nojs\"></noscript><a href=\"/\" aria-label=\"navigate to landing page\"><header>shareasecret</header></a><div class=\"container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -186,7 +186,7 @@ func pageViewSecret(cipherText string, c notifications) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs("if")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 107, Col: 11}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 108, Col: 11}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -199,7 +199,7 @@ func pageViewSecret(cipherText string, c notifications) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs("if")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 108, Col: 11}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 109, Col: 11}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -220,7 +220,7 @@ func pageViewSecret(cipherText string, c notifications) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(cipherText)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 114, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 115, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -233,7 +233,7 @@ func pageViewSecret(cipherText string, c notifications) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(cipherText)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 117, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 118, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -285,13 +285,13 @@ func pageManageSecret(manageSecretID string, viewSecretURL string, deleteSecretU
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(viewSecretURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 148, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 149, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <button aria-label=\"Copy viewing URL\" class=\"input-action j-button--copy\" data-target=\"viewing_url\"><img src=\"/static/images/clipboard_icon.svg\" aria-hidden=\"true\"></button></fieldset></fieldset></section><section class=\"manage-secret-page__buttons\"><a href=\"/\"><button type=\"button\" class=\"primary wide\">Create another secret</button></a><form action=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <button aria-label=\"Copy viewing URL\" class=\"input-action j-button--copy\" data-target=\"viewing_url\"><img src=\"/static/images/clipboard_icon.svg\" aria-hidden></button></fieldset></fieldset></section><section class=\"manage-secret-page__buttons\"><a href=\"/\"><button type=\"button\" class=\"primary wide\">Create another secret</button></a><form action=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -415,7 +415,10 @@ func componentNotifications(n notifications) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var22 = []any{"notifications__notification notifications__notification--error", templ.KV("notifications__notification--hidden", n.errorMsg == "")}
+		var templ_7745c5c3_Var22 = []any{
+			"notifications__notification notifications__notification--error",
+			templ.KV("notifications__notification--hidden", n.errorMsg == ""),
+		}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var22...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -433,14 +436,14 @@ func componentNotifications(n notifications) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><img src=\"/static/images/error_icon.svg\" aria-hidden=\"true\"> <span>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><img src=\"/static/images/error_icon.svg\" aria-hidden> <span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(n.errorMsg)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 200, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 204, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -450,7 +453,10 @@ func componentNotifications(n notifications) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var25 = []any{"notifications__notification notifications__notification--success", templ.KV("notifications__notification--hidden", n.successMsg == "")}
+		var templ_7745c5c3_Var25 = []any{
+			"notifications__notification notifications__notification--success",
+			templ.KV("notifications__notification--hidden", n.successMsg == ""),
+		}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var25...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -468,14 +474,14 @@ func componentNotifications(n notifications) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><img src=\"/static/images/tick_icon.svg\" aria-hidden=\"true\"> <span>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><img src=\"/static/images/tick_icon.svg\" aria-hidden> <span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(n.successMsg)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 206, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 213, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {

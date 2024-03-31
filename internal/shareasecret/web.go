@@ -20,6 +20,7 @@ import (
 func (a *Application) mapRoutes() {
 	fs := http.FileServer(http.Dir("./static/"))
 	a.router.Handle("GET /static/", http.StripPrefix("/static/", fs))
+	a.router.Handle("GET /robots.txt", serveFile("./static/robots.txt"))
 
 	a.router.HandleFunc("GET /", a.handleGetIndex)
 
@@ -47,6 +48,12 @@ func loggingHandler(h http.Handler) http.Handler {
 		r = r.WithContext(l.Logger().WithContext(r.Context()))
 
 		h.ServeHTTP(w, r)
+	})
+}
+
+func serveFile(fileName string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, fileName)
 	})
 }
 
