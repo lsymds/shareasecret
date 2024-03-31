@@ -5,6 +5,7 @@
 # Custom
 shareasecret.db
 shareasecret.db*
+.env
 
 # Binaries for programs and plugins
 *.exe
