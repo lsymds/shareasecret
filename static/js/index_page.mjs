@@ -15,33 +15,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		clearAndHideNotifications(createSecretForm);
 
-		const plaintextSecret = createSecretForm.querySelector(
-			"textarea[name=plaintextSecret]"
-		).value;
-		const password = createSecretForm.querySelector(
-			"input[name=password]"
-		).value;
+		const button = createSecretForm.querySelector("button");
 
-		const encryptedSecret = await encrypt(plaintextSecret, password);
+		try {
+			button.setAttribute("aria-busy", true);
 
-		const requestData = new URLSearchParams();
-		requestData.append(
-			"ttl",
-			createSecretForm.querySelector("select[name=ttl]").value
-		);
-		requestData.append("encryptedSecret", encryptedSecret);
+			const plaintextSecret = createSecretForm.querySelector(
+				"textarea[name=plaintextSecret]"
+			).value;
+			const password = createSecretForm.querySelector(
+				"input[name=password]"
+			).value;
 
-		const response = await fetch("/secret", {
-			method: "POST",
-			body: requestData,
-		});
+			const encryptedSecret = await encrypt(plaintextSecret, password);
 
-		if (response.status === 201) {
-			window.location.href = response.headers.get("Location");
-		} else if (response.status === 500) {
-			window.location.href = "/oops";
-		} else {
-			showErrorNotification(createSecretForm, await response.text());
+			const requestData = new URLSearchParams();
+			requestData.append(
+				"ttl",
+				createSecretForm.querySelector("select[name=ttl]").value
+			);
+			requestData.append("encryptedSecret", encryptedSecret);
+
+			const response = await fetch("/secret", {
+				method: "POST",
+				body: requestData,
+			});
+
+			if (response.status === 201) {
+				window.location.href = response.headers.get("Location");
+			} else if (response.status === 500) {
+				window.location.href = "/oops";
+			} else {
+				showErrorNotification(createSecretForm, await response.text());
+			}
+		} finally {
+			button.removeAttribute("aria-busy");
 		}
 	});
 });

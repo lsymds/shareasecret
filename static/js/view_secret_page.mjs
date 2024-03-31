@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		);
 
 		try {
+			submitButton.setAttribute("aria-busy", "true");
+
 			const decryptedCipherText = await decrypt(
 				cipherTextInput.value,
 				passwordInput.value
@@ -44,6 +46,8 @@ document.addEventListener("DOMContentLoaded", function () {
 				decryptSecretForm,
 				"Unable to decrypt secret. Have you entered the correct password?"
 			);
+		} finally {
+			submitButton.removeAttribute("aria-busy");
 		}
 	});
 });
