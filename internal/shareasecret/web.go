@@ -34,12 +34,29 @@ func (a *Application) mapRoutes() {
 }
 
 func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	loggingHandler(
-		a.router,
+	loggingMiddleware(
+		recoveryMiddleware(
+			a.router,
+		),
 	).ServeHTTP(w, r)
 }
 
-func loggingHandler(h http.Handler) http.Handler {
+func recoveryMiddleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		l := zerolog.Ctx(r.Context())
+
+		defer func() {
+			if err := recover(); err != nil {
+				l.Error().Any("panic", err).Msg("recovered from panic")
+				http.Redirect(w, r, "/oops", http.StatusSeeOther)
+			}
+		}()
+
+		h.ServeHTTP(w, r)
+	})
+}
+
+func loggingMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		l := log.With().
 			Str("url", r.URL.String()).
