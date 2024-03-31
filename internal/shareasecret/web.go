@@ -18,9 +18,9 @@ import (
 
 // mapRoutes maps all HTTP routes for the application.
 func (a *Application) mapRoutes() {
-	fs := http.FileServer(http.Dir("./static/"))
+	fs := http.FileServer(http.Dir("./web/"))
 	a.router.Handle("GET /static/", http.StripPrefix("/static/", fs))
-	a.router.Handle("GET /robots.txt", serveFile("./static/robots.txt"))
+	a.router.Handle("GET /robots.txt", serveFile("./web/robots.txt"))
 
 	a.router.HandleFunc("GET /", a.handleGetIndex)
 
