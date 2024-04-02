@@ -53,7 +53,13 @@ for the WebCrypto engine which powers the entire application to _actually_ work.
 
 ### Binary
 
-Coming soon...
+1. Download the latest binary archive from the releases page of this repository for your OS and architecture: `tbc`
+2. Extract it: `bzip2 -d archive.bz2`
+3. Set the environment database path environment variable: `export SHAREASECRET_DB_PATH="/path/to/shareasecret.db"`
+4. Set the base URL that your reverse proxy will be serving shareasecret from: `export SHAREASECRET_BASE_URL="https://secret.mycompany.example"`
+5. Run the binary: `./shareasecret`
+
+For non-testing purposes you should run the binary via a supervisor such as systemd.
 
 ### Docker
 
