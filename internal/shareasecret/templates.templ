@@ -71,7 +71,7 @@ templ pageIndex(c notifications) {
 					<div class="create-secret-form__options">
 						<fieldset class="create-secret-form__field create-secret-form__option-encryption-key">
 							<label for="password">Encryption key:</label>
-							<input form="none" type="text" name="password"/>
+							<input form="none" type="password" name="password"/>
 						</fieldset>
 						<fieldset class="create-secret-form__field create-secret-form__option-ttl">
 							<label for="ttl">Time until secret expires:</label>
@@ -119,7 +119,7 @@ templ pageViewSecret(cipherText string, c notifications) {
 					</fieldset>
 					<fieldset>
 						<label for="password">Encryption Key:</label>
-						<input type="text" name="password" autofocus/>
+						<input type="password" name="password" autofocus/>
 					</fieldset>
 					<button type="submit">Decrypt</button>
 				</form>

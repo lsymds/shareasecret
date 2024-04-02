@@ -6,6 +6,8 @@ without the plaintext version of your secret ever leaving your device.
 Due to its dependency on client side encryption libraries a browser supporting JavaScript is required in order to use
 shareasecret once deployed.
 
+![A screenshot of the landing page of a hosted shareasecret instance](/assets/screenshot.png)
+
 ## Disclaimer
 
 As per the license agreement you agree to when you utilise this software, no warranty is made as to its effectiveness
