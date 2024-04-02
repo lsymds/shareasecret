@@ -1,6 +1,9 @@
 package main
 
 import (
+	"embed"
+	"errors"
+	"io/fs"
 	"net/http"
 	"os"
 
@@ -9,11 +12,15 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+//go:embed web/**
+var embeddedWebAssets embed.FS
+
 func main() {
 	// extract any required environment variables
 	err := godotenv.Load()
-	if err != nil {
-		panic(err)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		log.Error().Err(err).Msg("loading .env file")
+		os.Exit(1)
 	}
 
 	dbPath := os.Getenv("SHAREASECRET_DB_PATH")
@@ -28,8 +35,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	webAssets, err := fs.Sub(embeddedWebAssets, "web")
+	if err != nil {
+		log.Error().Err(err).Msg("reading embedded web/ subdir")
+		os.Exit(1)
+	}
+
 	// initialize the wrapper application
-	application, err := shareasecret.NewApplication("file:"+dbPath, baseUrl)
+	application, err := shareasecret.NewApplication("file:"+dbPath, baseUrl, webAssets)
 	if err != nil {
 		log.Error().Err(err).Msg("initializing application")
 		os.Exit(1)

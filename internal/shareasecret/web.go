@@ -18,9 +18,9 @@ import (
 
 // mapRoutes maps all HTTP routes for the application.
 func (a *Application) mapRoutes() {
-	fs := http.FileServer(http.Dir("./web/"))
+	fs := http.FileServerFS(a.webAssets)
 	a.router.Handle("GET /static/", http.StripPrefix("/static/", fs))
-	a.router.Handle("GET /robots.txt", serveFile("./web/robots.txt"))
+	a.router.Handle("GET /robots.txt", a.serveFile("robots.txt"))
 
 	a.router.HandleFunc("GET /", a.handleGetIndex)
 
@@ -68,9 +68,9 @@ func loggingMiddleware(h http.Handler) http.Handler {
 	})
 }
 
-func serveFile(fileName string) http.Handler {
+func (a *Application) serveFile(fileName string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, fileName)
+		http.ServeFileFS(w, r, a.webAssets, fileName)
 	})
 }
 
