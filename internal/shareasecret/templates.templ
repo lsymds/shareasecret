@@ -66,12 +66,12 @@ templ pageIndex(c notifications) {
 					<input type="hidden" name="encryptedSecret"/>
 					<fieldset class="create-secret-form__field create-secret-form__option-plaintext-secret">
 						<label for="plaintextSecret">The text you'd like to make secret: </label>
-						<textarea form="none" name="plaintextSecret" autofocus></textarea>
+						<textarea autocomplete="off" form="none" name="plaintextSecret" autofocus data-1p-ignore></textarea>
 					</fieldset>
 					<div class="create-secret-form__options">
 						<fieldset class="create-secret-form__field create-secret-form__option-encryption-key">
 							<label for="password">Encryption key:</label>
-							<input form="none" type="password" name="password"/>
+							<input autocomplete="off" form="none" type="password" name="password" data-1p-ignore/>
 						</fieldset>
 						<fieldset class="create-secret-form__field create-secret-form__option-ttl">
 							<label for="ttl">Time until secret expires:</label>
@@ -115,11 +115,11 @@ templ pageViewSecret(cipherText string, c notifications) {
 					<input type="hidden" name="cipherText" value={ cipherText }/>
 					<fieldset>
 						<label for="display">Secret:</label>
-						<textarea name="display" disabled>{ cipherText }</textarea>
+						<textarea autocomplete="off" name="display" disabled data-1p-ignore>{ cipherText }</textarea>
 					</fieldset>
 					<fieldset>
 						<label for="password">Encryption Key:</label>
-						<input type="password" name="password" autofocus/>
+						<input autocomplete="off" type="password" name="password" autofocus data-1p-ignore/>
 					</fieldset>
 					<button type="submit">Decrypt</button>
 				</form>

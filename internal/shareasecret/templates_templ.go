@@ -140,7 +140,7 @@ func pageIndex(c notifications) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"hidden\" name=\"encryptedSecret\"><fieldset class=\"create-secret-form__field create-secret-form__option-plaintext-secret\"><label for=\"plaintextSecret\">The text you'd like to make secret: </label> <textarea form=\"none\" name=\"plaintextSecret\" autofocus></textarea></fieldset><div class=\"create-secret-form__options\"><fieldset class=\"create-secret-form__field create-secret-form__option-encryption-key\"><label for=\"password\">Encryption key:</label> <input form=\"none\" type=\"password\" name=\"password\"></fieldset><fieldset class=\"create-secret-form__field create-secret-form__option-ttl\"><label for=\"ttl\">Time until secret expires:</label> <select name=\"ttl\"><option value=\"30\">30 Minutes</option> <option value=\"60\">1 Hour</option> <option value=\"180\">3 Hours</option> <option value=\"720\">12 Hours</option> <option value=\"1440\">1 Day</option> <option value=\"4320\">3 Days</option> <option value=\"10080\">7 Days</option></select></fieldset></div><button type=\"submit\">Encrypt and save</button></form></section></main>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"hidden\" name=\"encryptedSecret\"><fieldset class=\"create-secret-form__field create-secret-form__option-plaintext-secret\"><label for=\"plaintextSecret\">The text you'd like to make secret: </label> <textarea autocomplete=\"off\" form=\"none\" name=\"plaintextSecret\" autofocus data-1p-ignore></textarea></fieldset><div class=\"create-secret-form__options\"><fieldset class=\"create-secret-form__field create-secret-form__option-encryption-key\"><label for=\"password\">Encryption key:</label> <input autocomplete=\"off\" form=\"none\" type=\"password\" name=\"password\" data-1p-ignore></fieldset><fieldset class=\"create-secret-form__field create-secret-form__option-ttl\"><label for=\"ttl\">Time until secret expires:</label> <select name=\"ttl\"><option value=\"30\">30 Minutes</option> <option value=\"60\">1 Hour</option> <option value=\"180\">3 Hours</option> <option value=\"720\">12 Hours</option> <option value=\"1440\">1 Day</option> <option value=\"4320\">3 Days</option> <option value=\"10080\">7 Days</option></select></fieldset></div><button type=\"submit\">Encrypt and save</button></form></section></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -226,20 +226,20 @@ func pageViewSecret(cipherText string, c notifications) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><fieldset><label for=\"display\">Secret:</label> <textarea name=\"display\" disabled>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><fieldset><label for=\"display\">Secret:</label> <textarea autocomplete=\"off\" name=\"display\" disabled data-1p-ignore>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(cipherText)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 118, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/shareasecret/templates.templ`, Line: 118, Col: 86}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</textarea></fieldset><fieldset><label for=\"password\">Encryption Key:</label> <input type=\"password\" name=\"password\" autofocus></fieldset><button type=\"submit\">Decrypt</button></form></section></main>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</textarea></fieldset><fieldset><label for=\"password\">Encryption Key:</label> <input autocomplete=\"off\" type=\"password\" name=\"password\" autofocus data-1p-ignore></fieldset><button type=\"submit\">Decrypt</button></form></section></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
