@@ -57,15 +57,23 @@ sites solely in a HTTPS context. It can utilise self signed certificates or cert
 LetsEncrypt but is an absolute requirement for security purposes; the protection of your users; and, most importantly,
 for the WebCrypto engine which powers the entire application to _actually_ work.
 
+### Source
+
+Building the application from source requires Go 1.22.
+
+1. Fetch the repository: `git clone https://github.com/lsymds/shareasecret.git && cd shareasecret/`
+2. Install the required Go dependencies: `go mod download`
+3. Copy the `.env.example` file to `.env` and update it: `cp .env.example .env`
+4. Run the application: `go run shareasecret.go`
+
+To compile the templates if you wish to make any front-end changes:
+
+1. Install the Templ CLI: `go install github.com/a-h/templ/cmd/templ@latest`
+2. Compile the templates: `templ generate`
+
 ### Binary
 
-1. Download the latest binary archive from the releases page of this repository for your OS and architecture: `tbc`
-2. Extract it: `bzip2 -d archive.bz2`
-3. Set the environment database path environment variable: `export SHAREASECRET_DB_PATH="/path/to/shareasecret.db"`
-4. Set the base URL that your reverse proxy will be serving shareasecret from: `export SHAREASECRET_BASE_URL="https://secret.mycompany.example"`
-5. Run the binary: `./shareasecret`
-
-For non-testing purposes you should run the binary via a supervisor such as systemd.
+Coming soon...
 
 ### Docker
 
