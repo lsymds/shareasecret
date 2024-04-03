@@ -61,10 +61,14 @@ for the WebCrypto engine which powers the entire application to _actually_ work.
 
 Building the application from source requires Go 1.22.
 
+When running for development purposes on a localhost IP address some browsers will consider it secure and provide APIs
+(such as Web Crypto) that it otherwise wouldn't without being on a secure site.
+
 1. Fetch the repository: `git clone https://github.com/lsymds/shareasecret.git && cd shareasecret/`
 2. Install the required Go dependencies: `go mod download`
 3. Copy the `.env.example` file to `.env` and update it: `cp .env.example .env`
-4. Run the application: `go run shareasecret.go`
+4. Build the application: `go build -o shareasecret .`
+5. Execute the application: `./shareasecret`
 
 To compile the templates if you wish to make any front-end changes:
 
