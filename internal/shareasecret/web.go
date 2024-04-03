@@ -252,7 +252,7 @@ func setFlashSuccess(msg string, w http.ResponseWriter) {
 
 func setFlash(name string, msg string, w http.ResponseWriter) {
 	n := fmt.Sprintf("flash_%s", name)
-	http.SetCookie(w, &http.Cookie{Name: n, Value: msg, Path: "/"})
+	http.SetCookie(w, &http.Cookie{Name: n, Value: msg, Path: "/", HttpOnly: true})
 }
 
 func notificationsFromRequest(r *http.Request, w http.ResponseWriter) notifications {
@@ -275,11 +275,12 @@ func flash(name string, r *http.Request, w http.ResponseWriter) string {
 	http.SetCookie(
 		w,
 		&http.Cookie{
-			Name:    n,
-			Value:   "",
-			Expires: time.Unix(1, 0),
-			MaxAge:  -1,
-			Path:    "/",
+			Name:     n,
+			Value:    "",
+			Expires:  time.Unix(1, 0),
+			MaxAge:   -1,
+			Path:     "/",
+			HttpOnly: true,
 		},
 	)
 
