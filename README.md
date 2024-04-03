@@ -33,7 +33,7 @@ available in most modern browsers.
 When you create a secret with your provided "encryption password", a 256 bit AES-GCM encryption key is derived from it
 using the PBKDF2 key derivation function. This key is then used in the AES-GCM encryption algorithm to encrypt the plain
 text secret resulting in a text blob consisting of three parts: the plaintext 128 bit cryptographically random generated
-salt for the PBKDF2 function; the plaintext 96 bit cryptographically randomly generated IV (initialization vector) for
+salt for the PBKDF2 function; the plaintext 96 bit cryptographically random generated IV (initialization vector) for
 the AES-GCM encryption algorithm; and the encrypted cipher text of the original secret.
 
 This text blob is what is then sent to the server to be persisted as a "secret". At this point, two 192 bit
