@@ -15,7 +15,11 @@ import (
 //go:embed web/**
 var embeddedWebAssets embed.FS
 
+var version string = "0.0.1"
+
 func main() {
+	log.Info().Str("version", version).Msg("starting shareasecret")
+
 	// extract any required environment variables
 	err := godotenv.Load()
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -57,7 +61,7 @@ func main() {
 	application.RunDeleteExpiredSecretsJob()
 
 	// serve all HTTP endpoints
-	log.Info().Str("addr", listeningAddr).Msg("starting HTTP server")
+	log.Info().Str("addr", listeningAddr).Msg("booting HTTP server")
 	err = http.ListenAndServe(listeningAddr, application)
 	if err != nil {
 		log.Error().Err(err).Msg("listen and serve")
