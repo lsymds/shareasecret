@@ -16,6 +16,10 @@ security audits from reputable security firms.
 
 For more information, see the [LICENSE](/LICENSE).
 
+## Issues?
+
+Please report any issues (with reproduction steps if applicable) in this repository's issue tracker.
+
 ## How does it work?
 
 shareasecret is a Go application built with the Templ templating language and enhanced with vanilla JavaScript and CSS.
