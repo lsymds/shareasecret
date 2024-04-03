@@ -93,4 +93,5 @@ a file, place a `.env` file in your working directory.
 - `SHAREASECRET_DB_PATH` - the path to the database file. Will be created if it doesn't exist. Accompanying `shm` and
   `wal` files will be created alongside it.
 - `SHAREASECRET_BASE_URL` - the base URL that shareasecret will be running under i.e. `https://secret.mycompany.example`
-- `SHAREASECRET_LISTENING_ADDR` - the address (including port) that the server will listen on. Defaults to `127.0.0.1:8994`.
+- `SHAREASECRET_LISTENING_ADDR` - the address (including port) that the server will listen on. Defaults to
+  `127.0.0.1:8994`.
