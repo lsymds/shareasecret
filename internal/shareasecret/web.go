@@ -28,7 +28,9 @@ func (a *Application) mapRoutes() {
 	a.router.Handle("GET /oops", templ.Handler(pageOops()))
 
 	a.router.HandleFunc("POST /secret", a.handleCreateSecret)
-	a.router.HandleFunc("GET /secret/{viewingID}", a.handleGetSecret)
+	a.router.HandleFunc("GET /secret/{accessID}", a.handleAccessSecretInterstitial)
+	a.router.HandleFunc("POST /secret/{accessID}", a.handleCreateSecretView)
+	a.router.HandleFunc("GET /secret/{accessID}/{viewingKey}", a.handleAccessSecret)
 	a.router.HandleFunc("GET /manage-secret/{managementID}", a.handleManageSecret)
 	a.router.HandleFunc("POST /manage-secret/{managementID}/delete", a.handleDeleteSecret)
 }
@@ -105,14 +107,14 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 
 	// create the secret, and generate two cryptographically random, 192 bit identifiers to use for viewing and
 	// management of the secret respectively
-	viewingID, err := secureID()
+	accessID, err := secureID(24)
 	if err != nil {
-		l.Err(err).Msg("generating viewing id")
+		l.Err(err).Msg("generating access id")
 		internalServerError(w)
 		return
 	}
 
-	managementID, err := secureID()
+	managementID, err := secureID(24)
 	if err != nil {
 		l.Err(err).Msg("generating management id")
 		internalServerError(w)
@@ -122,11 +124,11 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 	if _, err := a.db.db.Exec(
 		`
 			INSERT INTO
-				secrets (viewing_id, management_id, cipher_text, ttl, created_at)
+				secrets (access_id, management_id, cipher_text, ttl, created_at)
 			VALUES
 				(?, ?, ?, ?, ?)
 		`,
-		viewingID,
+		accessID,
 		managementID,
 		secret,
 		ttl,
@@ -141,57 +143,27 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 	http.Redirect(w, r, fmt.Sprintf("/manage-secret/%s", managementID), http.StatusCreated)
 }
 
-func (a *Application) handleGetSecret(w http.ResponseWriter, r *http.Request) {
-	l := zerolog.Ctx(r.Context())
-	viewingID := r.PathValue("viewingID")
+func (a *Application) handleAccessSecretInterstitial(w http.ResponseWriter, r *http.Request) {
+	accessID := r.PathValue("accessID")
 
-	// retrieve the cipher text for the relevant secret, or return an error if that secret cannot be found
-	var cipherText string
+	l := zerolog.Ctx(r.Context()).
+		With().
+		Str("access_id", accessID).
+		Logger()
 
+	// retrieve the row identifier of the secret if it exists and has not been deleted
+	var secretID int
 	err := a.db.db.QueryRow(
 		`
 			SELECT
-				cipher_text
+				id
 			FROM
 				secrets
 			WHERE
-				viewing_id = ? AND
+				access_id = ? AND
 				deleted_at IS NULL
 		`,
-		viewingID,
-	).Scan(&cipherText)
-
-	if errors.Is(sql.ErrNoRows, err) {
-		setFlashErr("Secret does not exist or has been deleted.", w)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	} else if err != nil {
-		l.Err(err).Str("viewing_id", viewingID).Msg("retrieving secret")
-		http.Redirect(w, r, "/oops", http.StatusSeeOther)
-		return
-	}
-
-	pageViewSecret(cipherText, notificationsFromRequest(r, w)).Render(r.Context(), w)
-}
-
-func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request) {
-	l := zerolog.Ctx(r.Context())
-	managementID := r.PathValue("managementID")
-
-	// retrieve the ID in order to view and decrypt the secret, or return an error if that secret cannot be found
-	var secretID string
-
-	err := a.db.db.QueryRow(
-		`
-			SELECT
-				viewing_id
-			FROM
-				secrets
-			WHERE
-				management_id = ? AND
-				deleted_at IS NULL
-		`,
-		managementID,
+		accessID,
 	).Scan(&secretID)
 
 	if errors.Is(sql.ErrNoRows, err) {
@@ -199,14 +171,177 @@ func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	} else if err != nil {
-		l.Err(err).Str("management_id", managementID).Msg("retrieving secret")
-		http.Redirect(w, r, "/oops", http.StatusSeeOther)
+		l.Err(err).Msg("retrieving secret")
+		redirectToOopsPage(w, r)
+		return
+	}
+
+	pageViewSecretInterstitial().Render(r.Context(), w)
+}
+
+func (a *Application) handleCreateSecretView(w http.ResponseWriter, r *http.Request) {
+	accessID := r.PathValue("accessID")
+
+	l := zerolog.Ctx(r.Context()).
+		With().
+		Str("access_id", accessID).
+		Logger()
+
+	// create a 64 bit viewing key for the secret view record
+	key, err := secureID(8)
+	if err != nil {
+		l.Err(err).Msg("creating secret viewing key")
+		redirectToOopsPage(w, r)
+		return
+	}
+
+	// create the secret view without a viewing date
+	rs, err := a.db.db.Exec(
+		`
+			INSERT INTO secret_views (secret_id, viewing_key, created_at)
+			SELECT
+				id,
+				?,
+				?
+			FROM
+				secrets
+			WHERE
+				access_id = ? AND
+				deleted_at IS NULL
+		`,
+		key,
+		time.Now().UnixMilli(),
+		accessID,
+	)
+
+	if errors.Is(sql.ErrNoRows, err) {
+		setFlashErr("Secret does not exist or has been deleted.", w)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	} else if err != nil {
+		l.Err(err).Msg("creating secret view")
+		redirectToOopsPage(w, r)
+		return
+	} else if rc, err := rs.RowsAffected(); err != nil || rc == 0 {
+		l.Error().Err(err).Msg("creating secret view")
+		redirectToOopsPage(w, r)
+		return
+	}
+
+	// redirect them to the actual viewing page of the secret
+	http.Redirect(w, r, fmt.Sprintf("/secret/%s/%s", accessID, key), http.StatusSeeOther)
+}
+
+func (a *Application) handleAccessSecret(w http.ResponseWriter, r *http.Request) {
+	accessID := r.PathValue("accessID")
+	viewingKey := r.PathValue("viewingKey")
+
+	l := zerolog.
+		Ctx(r.Context()).
+		With().
+		Str("access_id", accessID).
+		Str("viewing_key", viewingKey).
+		Logger()
+
+	// begin a transaction so the retrieval of the secret's details and the recording of the view being used are atomic
+	tx, err := a.db.db.Begin()
+	if err != nil {
+		l.Err(err).Msg("begin tx")
+		redirectToOopsPage(w, r)
+		return
+	}
+
+	defer tx.Rollback()
+
+	// retrieve the cipher text and secret view id for the relevant secret, or return an error if that secret cannot be found
+	var cipherText string
+	var secretViewID int
+
+	err = tx.QueryRow(
+		`
+			SELECT
+				s.cipher_text,
+				v.id
+			FROM
+				secrets s
+				INNER JOIN secret_views v ON v.secret_id = s.id
+			WHERE
+				s.access_id = ? AND
+				s.deleted_at IS NULL AND
+				v.viewing_key = ? AND
+				v.viewed_at IS NULL
+		`,
+		accessID,
+		viewingKey,
+	).Scan(&cipherText, &secretViewID)
+
+	if errors.Is(sql.ErrNoRows, err) {
+		setFlashErr("Secret does not exist, has been deleted, or the unique viewing key you attempted to use has been used before.", w)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	} else if err != nil {
+		l.Err(err).Msg("retrieving secret")
+		redirectToOopsPage(w, r)
+		return
+	}
+
+	// record the secret view as being used so nobody else can use it to see the secret
+	_, err = tx.Exec("UPDATE secret_views SET viewed_at = ? WHERE id = ?", time.Now().UnixMilli(), secretViewID)
+	if err != nil {
+		l.Err(err).Msg("updating secret view")
+		redirectToOopsPage(w, r)
+		return
+	}
+
+	// commit the transaction
+	err = tx.Commit()
+	if err != nil {
+		l.Err(err).Msg("updating secret view")
+		redirectToOopsPage(w, r)
+		return
+	}
+
+	pageViewSecret(cipherText, notificationsFromRequest(r, w)).Render(r.Context(), w)
+}
+
+func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request) {
+	managementID := r.PathValue("managementID")
+
+	l := zerolog.
+		Ctx(r.Context()).
+		With().
+		Str("management_id", managementID).
+		Logger()
+
+	// retrieve the ID in order to view and decrypt the secret, or return an error if that secret cannot be found
+	var accessID string
+
+	err := a.db.db.QueryRow(
+		`
+			SELECT
+				access_id
+			FROM
+				secrets
+			WHERE
+				management_id = ? AND
+				deleted_at IS NULL
+		`,
+		managementID,
+	).Scan(&accessID)
+
+	if errors.Is(sql.ErrNoRows, err) {
+		setFlashErr("Secret does not exist or has been deleted.", w)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	} else if err != nil {
+		l.Err(err).Msg("retrieving secret")
+		redirectToOopsPage(w, r)
 		return
 	}
 
 	pageManageSecret(
 		managementID,
-		fmt.Sprintf("%s/secret/%s", a.baseURL, secretID),
+		fmt.Sprintf("%s/secret/%s", a.baseURL, accessID),
 		fmt.Sprintf("%s/manage-secret/%s/delete", a.baseURL, managementID),
 		notificationsFromRequest(r, w),
 	).Render(r.Context(), w)
@@ -225,7 +360,7 @@ func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request)
 	)
 	if err != nil {
 		l.Err(err).Str("management_id", managementID).Msg("deleting secret")
-		http.Redirect(w, r, "/oops", http.StatusSeeOther)
+		redirectToOopsPage(w, r)
 		return
 	}
 
@@ -240,6 +375,10 @@ func badRequest(err string, w http.ResponseWriter) {
 
 func internalServerError(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusInternalServerError)
+}
+
+func redirectToOopsPage(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/oops", http.StatusSeeOther)
 }
 
 func setFlashErr(msg string, w http.ResponseWriter) {
@@ -287,8 +426,8 @@ func flash(name string, r *http.Request, w http.ResponseWriter) string {
 	return c.Value
 }
 
-func secureID() (string, error) {
-	b := make([]byte, 24)
+func secureID(size int) (string, error) {
+	b := make([]byte, size)
 
 	if _, err := rand.Read(b); err != nil {
 		return "", err

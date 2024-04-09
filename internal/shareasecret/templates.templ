@@ -95,6 +95,26 @@ templ pageIndex(c notifications) {
 	}
 }
 
+templ pageViewSecretInterstitial() {
+	@layout(nil) {
+		<main>
+			<section>
+				<h1>open secret</h1>
+				<p>
+					by clicking the button below and progressing you will add a view of the secret. if your view is then equal to
+					the maximum amount of views this secret permits, it will be deleted and will not be viewable for anyone
+					but you in your current session
+				</p>
+			</section>
+			<section>
+				<form method="POST">
+					<button type="submit">Open Secret</button>
+				</form>
+			</section>
+		</main>
+	}
+}
+
 templ pageViewSecret(cipherText string, c notifications) {
 	@layout([]templ.Component{script("module", "/static/js/view_secret_page.mjs")}) {
 		<main>
