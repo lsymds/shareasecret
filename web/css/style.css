@@ -109,16 +109,16 @@ button {
   .create-secret-form .create-secret-form__options {
       display: grid;
       grid-template-columns: 1fr;
-  }
-
-  .create-secret-form .create-secret-form__option-encryption-key {
-      grid-column-start: 1;
-      grid-column-end: 3;
+      column-gap: 12px;
   }
 
   @media screen and (min-width: 768px) {
     .create-secret-form .create-secret-form__options {
       grid-template-columns: 1fr 1fr 1fr;
-      column-gap: 12px;
+    }
+
+    .create-secret-form .create-secret-form__option-encryption-key {
+        grid-column-start: 1;
+        grid-column-end: 3;
     }
   }
