@@ -3,6 +3,7 @@ package shareasecret
 import (
 	"crypto/rand"
 	"database/sql"
+	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -374,7 +375,6 @@ func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request)
 	}
 
 	pageManageSecret(
-		managementID,
 		fmt.Sprintf("%s/secret/%s", a.baseURL, accessID),
 		fmt.Sprintf("%s/manage-secret/%s/delete", a.baseURL, managementID),
 		notificationsFromRequest(r, w),
@@ -419,18 +419,24 @@ func setFlashErr(msg string, w http.ResponseWriter) {
 	setFlash("err", msg, w)
 }
 
+func setFlashWarning(msg string, w http.ResponseWriter) {
+	setFlash("warn", msg, w)
+}
+
 func setFlashSuccess(msg string, w http.ResponseWriter) {
 	setFlash("success", msg, w)
 }
 
 func setFlash(name string, msg string, w http.ResponseWriter) {
 	n := fmt.Sprintf("flash_%s", name)
-	http.SetCookie(w, &http.Cookie{Name: n, Value: msg, Path: "/", HttpOnly: true})
+	m := base64.StdEncoding.EncodeToString([]byte(msg))
+	http.SetCookie(w, &http.Cookie{Name: n, Value: m, Path: "/", HttpOnly: true})
 }
 
 func notificationsFromRequest(r *http.Request, w http.ResponseWriter) notifications {
 	return notifications{
 		errorMsg:   flash("err", r, w),
+		warningMsg: flash("warn", r, w),
 		successMsg: flash("success", r, w),
 	}
 }
@@ -457,7 +463,13 @@ func flash(name string, r *http.Request, w http.ResponseWriter) string {
 		},
 	)
 
-	return c.Value
+	// extract the base64 encoded cookie value and decode it before returning it
+	v, err := base64.StdEncoding.DecodeString(c.Value)
+	if err != nil {
+		return ""
+	}
+
+	return string(v)
 }
 
 func secureID(size int) (string, error) {
