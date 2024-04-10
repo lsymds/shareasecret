@@ -8,6 +8,7 @@ import (
 
 const deletionReasonExpired = "expired"
 const deletionReasonUserDeleted = "user_deleted"
+const deletionReasonMaximumViewCountHit = "maximum_view_count_hit"
 
 // Application is a wrapper/container for the "ShareASecret" project. All jobs and entry points hang off of this
 // struct.

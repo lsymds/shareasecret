@@ -89,6 +89,11 @@ button {
       color: #394D00;
     }
 
+    .notifications .notifications__notification.notifications__notification--warning {
+      border-left: 6px solid #FEB670;
+      color: #AD6400;
+    }
+
     .notifications .notifications__notification.notifications__notification--error {
       border-left: 6px solid #F5A390;
       color: #861D13;
@@ -114,6 +119,6 @@ button {
   @media screen and (min-width: 768px) {
     .create-secret-form .create-secret-form__options {
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
+      column-gap: 12px;
     }
   }

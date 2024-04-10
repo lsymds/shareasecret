@@ -82,8 +82,10 @@ func (a *Application) handleGetIndex(w http.ResponseWriter, r *http.Request) {
 
 func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request) {
 	l := zerolog.Ctx(r.Context())
+
 	secret := ""
 	ttl := 0
+	maxViews := 0
 
 	// parse and validate the request
 	if err := r.ParseForm(); err != nil {
@@ -101,6 +103,12 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 		ttl, err = strconv.Atoi(r.Form.Get("ttl"))
 		if err != nil {
 			badRequest("Unable to parse the TTL (time to live) for the secret.", w)
+			return
+		}
+
+		maxViews, err = strconv.Atoi(r.Form.Get("maxViews"))
+		if err != nil || maxViews < 0 {
+			badRequest("Unable to parse the maximum views permitted for the secret.", w)
 			return
 		}
 	}
@@ -124,14 +132,15 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 	if _, err := a.db.db.Exec(
 		`
 			INSERT INTO
-				secrets (access_id, management_id, cipher_text, ttl, created_at)
+				secrets (access_id, management_id, cipher_text, ttl, maximum_views, created_at)
 			VALUES
-				(?, ?, ?, ?, ?)
+				(?, ?, ?, ?, ?, ?)
 		`,
 		accessID,
 		managementID,
 		secret,
 		ttl,
+		maxViews,
 		time.Now().UnixMilli(),
 	); err != nil {
 		l.Err(err).Msg("creating secret")
@@ -236,6 +245,8 @@ func (a *Application) handleAccessSecret(w http.ResponseWriter, r *http.Request)
 	accessID := r.PathValue("accessID")
 	viewingKey := r.PathValue("viewingKey")
 
+	notifications := notifications{}
+
 	l := zerolog.
 		Ctx(r.Context()).
 		With().
@@ -256,12 +267,16 @@ func (a *Application) handleAccessSecret(w http.ResponseWriter, r *http.Request)
 	// retrieve the cipher text and secret view id for the relevant secret, or return an error if that secret cannot be found
 	var cipherText string
 	var secretViewID int
+	var maxViews int
+	var currentViews int
 
 	err = tx.QueryRow(
 		`
 			SELECT
 				s.cipher_text,
-				v.id
+				v.id,
+				s.maximum_views,
+				(SELECT COUNT(1) FROM secret_views v2 WHERE v2.secret_id = v.secret_id AND viewed_at IS NOT NULL)
 			FROM
 				secrets s
 				INNER JOIN secret_views v ON v.secret_id = s.id
@@ -273,7 +288,7 @@ func (a *Application) handleAccessSecret(w http.ResponseWriter, r *http.Request)
 		`,
 		accessID,
 		viewingKey,
-	).Scan(&cipherText, &secretViewID)
+	).Scan(&cipherText, &secretViewID, &maxViews, &currentViews)
 
 	if errors.Is(sql.ErrNoRows, err) {
 		setFlashErr("Secret does not exist, has been deleted, or the unique viewing key you attempted to use has been used before.", w)
@@ -293,15 +308,33 @@ func (a *Application) handleAccessSecret(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	// mark the secret as being deleted if this view is equal to or exceeds the maximum permitted views for the secret
+	if maxViews > 0 && currentViews+1 >= maxViews {
+		_, err := tx.Exec(
+			"UPDATE secrets SET deleted_at = ?, deletion_reason = ?, cipher_text = NULL WHERE access_id = ?",
+			time.Now().UnixMilli(),
+			deletionReasonMaximumViewCountHit,
+			accessID,
+		)
+
+		if err != nil {
+			l.Err(err).Msg("deleting secret")
+			redirectToOopsPage(w, r)
+			return
+		}
+
+		notifications.warningMsg = "Maximum views reached. This secret will not be accessible again."
+	}
+
 	// commit the transaction
 	err = tx.Commit()
 	if err != nil {
-		l.Err(err).Msg("updating secret view")
+		l.Err(err).Msg("committing tx")
 		redirectToOopsPage(w, r)
 		return
 	}
 
-	pageViewSecret(cipherText, notificationsFromRequest(r, w)).Render(r.Context(), w)
+	pageViewSecret(cipherText, notifications).Render(r.Context(), w)
 }
 
 func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request) {

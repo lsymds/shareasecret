@@ -35,6 +35,10 @@ document.addEventListener("DOMContentLoaded", function () {
 				createSecretForm.querySelector("select[name=ttl]").value
 			);
 			requestData.append("encryptedSecret", encryptedSecret);
+			requestData.append(
+				"maxViews",
+				createSecretForm.querySelector("input[name=maxViews]").value
+			);
 
 			const response = await fetch("/secret", {
 				method: "POST",

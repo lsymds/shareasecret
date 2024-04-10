@@ -2,6 +2,7 @@ package shareasecret
 
 type notifications struct {
 	errorMsg   string
+	warningMsg string
 	successMsg string
 }
 
@@ -64,16 +65,16 @@ templ pageIndex(c notifications) {
 				<form id="createSecretForm" class="create-secret-form">
 					@componentNotifications(c)
 					<input type="hidden" name="encryptedSecret"/>
-					<fieldset class="create-secret-form__field create-secret-form__option-plaintext-secret">
+					<div class="create-secret-form__field create-secret-form__option-plaintext-secret">
 						<label for="plaintextSecret">The text you'd like to make secret: </label>
-						<textarea autocomplete="off" form="none" name="plaintextSecret" autofocus data-1p-ignore></textarea>
-					</fieldset>
+						<textarea autocomplete="off" form="none" name="plaintextSecret" rows="5" autofocus data-1p-ignore></textarea>
+					</div>
 					<div class="create-secret-form__options">
-						<fieldset class="create-secret-form__field create-secret-form__option-encryption-key">
+						<div class="create-secret-form__field create-secret-form__option-encryption-key">
 							<label for="password">Encryption key:</label>
 							<input autocomplete="off" form="none" type="password" name="password" data-1p-ignore/>
-						</fieldset>
-						<fieldset class="create-secret-form__field create-secret-form__option-ttl">
+						</div>
+						<div class="create-secret-form__field create-secret-form__option-ttl">
 							<label for="ttl">Time until secret expires:</label>
 							<select name="ttl">
 								<option value="30">30 Minutes</option>
@@ -84,7 +85,11 @@ templ pageIndex(c notifications) {
 								<option value="4320">3 Days</option>
 								<option value="10080">7 Days</option>
 							</select>
-						</fieldset>
+						</div>
+						<div class="create-secret-form__field create-secret-form__option-maximum-views">
+							<label for="maxViews">Maximum Views (0 = infinite):</label>
+							<input autocomplete="off" type="number" min="0" name="maxViews" value="0"/>
+						</div>
 					</div>
 					<button type="submit">
 						Encrypt and save
@@ -222,6 +227,15 @@ templ componentNotifications(n notifications) {
 		>
 			<img src="/static/images/error_icon.svg" aria-hidden/>
 			<span>{ n.errorMsg }</span>
+		</div>
+		<div
+			class={
+				"notifications__notification notifications__notification--warning",
+				templ.KV("notifications__notification--hidden", n.warningMsg == ""),
+			}
+		>
+			<img src="/static/images/warning_icon.svg" aria-hidden/>
+			<span>{ n.warningMsg }</span>
 		</div>
 		<div
 			class={
