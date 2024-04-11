@@ -12,13 +12,14 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/lsymds/staticmodtimefs"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 // mapRoutes maps all HTTP routes for the application.
 func (a *Application) mapRoutes() {
-	fs := http.FileServerFS(a.webAssets)
+	fs := http.FileServerFS(staticmodtimefs.NewStaticModTimeFS(a.webAssets, time.Now()))
 	a.router.Handle("GET /static/", http.StripPrefix("/static/", fs))
 	a.router.Handle("GET /robots.txt", a.serveFile("robots.txt"))
 
