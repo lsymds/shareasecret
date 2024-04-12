@@ -17,6 +17,6 @@ jobs:
         with:
           go-version: 1.22
       - name: build
-        run: go build staticmodtimefs.go
+        run: go build shareasecret.go
       - name: test
         run: go test ./... -v
