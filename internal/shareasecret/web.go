@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"strconv"
 	"strings"
@@ -20,9 +21,11 @@ import (
 
 // mapRoutes maps all HTTP routes for the application.
 func (a *Application) mapRoutes() {
-	fs := http.FileServerFS(staticmodtimefs.NewStaticModTimeFS(a.webAssets, time.Now()))
-	a.router.Handle("GET /static/", http.StripPrefix("/static/", fs))
-	a.router.Handle("GET /robots.txt", a.serveFile("robots.txt"))
+	assetsFS := staticmodtimefs.NewStaticModTimeFS(a.webAssets, time.Now())
+	assetsFSHandler := http.FileServerFS(assetsFS)
+
+	a.router.Handle("GET /static/", http.StripPrefix("/static/", assetsFSHandler))
+	a.router.Handle("GET /robots.txt", serveFile(assetsFS, "robots.txt"))
 
 	a.router.HandleFunc("GET /", a.handleGetIndex)
 
@@ -72,9 +75,9 @@ func loggingMiddleware(h http.Handler) http.Handler {
 	})
 }
 
-func (a *Application) serveFile(fileName string) http.Handler {
+func serveFile(fs fs.FS, fileName string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFileFS(w, r, a.webAssets, fileName)
+		http.ServeFileFS(w, r, fs, fileName)
 	})
 }
 
