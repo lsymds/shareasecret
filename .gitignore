@@ -5,6 +5,8 @@
 # Custom
 shareasecret.db
 shareasecret.db*
+shareasecret_test.db
+shareasecret_test.db*
 .env
 build/tmp/
 
