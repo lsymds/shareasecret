@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// RunDeleteExpiredSecretsJob runs a background job that identifies expired secrets and removes them accordingly.
+// RunDeleteExpiredSecretsJob runs a background job that identifies expired secrets and removes them accordingly
 func (a *Application) RunDeleteExpiredSecretsJob() {
 	runJobInBackground(
 		"delete_expired_secrets",
@@ -45,6 +45,8 @@ func (a *Application) RunDeleteExpiredSecretsJob() {
 	)
 }
 
+// runJobInBackground runs the given function in a coroutine, recovering from any panics and repeating continuously,
+// pausing for the specified duration after every run
 func runJobInBackground(name string, f func(l zerolog.Logger) error, every time.Duration) {
 	go func() {
 		for {
