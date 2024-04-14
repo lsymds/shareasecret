@@ -1,0 +1,31 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release-binary-archives:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [linux, darwin, windows]
+        arch: [386, amd64, arm, arm64]
+        exclude:
+          - os: darwin
+            arch: 386
+          - os: darwin
+            arch: arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.22
+      - name: Build Release
+        run: ./build/ci/build_release.sh ${{ matrix.os }} ${{ matrix.arch }} ${{ github.ref_name }}
+      - name: Create and Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./build/tmp/*

@@ -80,7 +80,14 @@ To compile the templates if you wish to make any front-end changes:
 
 ### Binary
 
-Coming soon...
+Requirements: `bzip2`
+
+1. Download the latest release for your operating system and architecture from the releases page:
+   [https://github.com/lsymds/shareasecret/releases](https://github.com/lsymds/shareasecret/releases).
+2. Extract the archive: `bunzip2 shareasecret-linux-amd64-v1.0.0.bzip2`
+3. Set the environment variables according to the configuration section below.
+4. Execute the extracted binary: `./shareasecret-linux-amd64-v1.0.0`
+5. Profit.
 
 ### Docker
 
