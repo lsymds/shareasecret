@@ -89,7 +89,7 @@ func TestSecretManagement(t *testing.T) {
 
 		err := app.db.db.QueryRow("SELECT deleted_at FROM secrets WHERE access_id = ?", accessID).Scan(&deletedAt)
 		if err != nil {
-			t.Errorf("err when querying secret: %v", err)
+			t.Errorf("querying secret: %v", err)
 		} else if !deletedAt.Valid {
 			t.Errorf("expected secret's deleted_at to have been set")
 		}
@@ -137,7 +137,7 @@ func TestSecretAccess(t *testing.T) {
 			Scan(&deletedAt, &deletionReason)
 
 		if err != nil {
-			t.Errorf("err when querying secret: %v", err)
+			t.Errorf("querying secret: %v", err)
 		} else if !deletedAt.Valid {
 			t.Errorf("expected secret's deleted_at to have been set")
 		} else if deletionReason.String != deletionReasonMaximumViewCountHit {
@@ -162,7 +162,7 @@ func TestSecretAccess(t *testing.T) {
 			accessID,
 		)
 		if err != nil {
-			t.Errorf("failed to create secret_view: %v", err)
+			t.Errorf("creating secret_view: %v", err)
 		}
 
 		r := get(t, app.handleAccessSecret, func(hr *http.Request) {
@@ -192,7 +192,7 @@ func post(t *testing.T, endpoint http.HandlerFunc, body string, rc func(r *http.
 
 	b, err := io.ReadAll(recorder.Body)
 	if err != nil {
-		t.Errorf("unable to read body from endpoint (%v): %v", endpoint, err)
+		t.Errorf("reading body from endpoint (%v): %v", endpoint, err)
 	}
 
 	return consumedResponse{
@@ -218,7 +218,7 @@ func get(t *testing.T, endpoint http.HandlerFunc, rc func(r *http.Request)) cons
 
 	b, err := io.ReadAll(recorder.Body)
 	if err != nil {
-		t.Errorf("unable to read body from endpoint (%v): %v", endpoint, err)
+		t.Errorf("reading body from endpoint (%v): %v", endpoint, err)
 	}
 
 	return consumedResponse{
@@ -266,7 +266,7 @@ func createSecret(t *testing.T, deletedAt time.Time, deletionReason string) (str
 		time.Now().UnixMilli(),
 	)
 	if err != nil {
-		t.Errorf("failed creating secret: %v", err)
+		t.Errorf("creating secret: %v", err)
 	}
 
 	return accessID, managementID

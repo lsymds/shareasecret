@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 var app *Application
@@ -26,4 +27,16 @@ func TestMain(m *testing.M) {
 	}()
 
 	m.Run()
+}
+
+func until(t *testing.T, try func() bool, maximumTries uint8, delay time.Duration) {
+	for i := 0; i < int(maximumTries); i++ {
+		if r := try(); r {
+			return
+		}
+
+		<-time.After(delay)
+	}
+
+	t.Error("until maximumTries exceeded")
 }
