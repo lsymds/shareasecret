@@ -30,6 +30,7 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
+// createSecret creates a secret instance in the database
 func createSecret(t *testing.T, deletedAt time.Time, deletionReason string) (string, string) {
 	accessID, _ := secureID(24)
 	managementID, _ := secureID(24)
@@ -66,6 +67,8 @@ func createSecret(t *testing.T, deletedAt time.Time, deletionReason string) (str
 	return accessID, managementID
 }
 
+// until continuously loops until the given function returns truthy or the maximum tries are exceeded (at which point a
+// test failure will occur)
 func until(t *testing.T, try func() bool, maximumTries uint8, delay time.Duration) {
 	for i := 0; i < int(maximumTries); i++ {
 		if r := try(); r {

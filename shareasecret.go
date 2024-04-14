@@ -15,6 +15,9 @@ import (
 //go:embed web/**
 var embeddedWebAssets embed.FS
 
+// version defines the version of the application, used for informational purposes when logging.
+//
+// It is overwritten by utilising build tags at build time.
 var version string = "0.0.1"
 
 func main() {

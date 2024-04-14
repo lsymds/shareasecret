@@ -177,6 +177,8 @@ func TestSecretAccess(t *testing.T) {
 	})
 }
 
+// post calls the handler, constructing an appropriate request and body and returning a simplified, already-read
+// version of the response
 func post(t *testing.T, endpoint http.HandlerFunc, body string, rc func(r *http.Request)) consumedResponse {
 	recorder := httptest.NewRecorder()
 
@@ -203,8 +205,11 @@ func post(t *testing.T, endpoint http.HandlerFunc, body string, rc func(r *http.
 	}
 }
 
+// emptyRequestConfigurer is a no-op request configuring function
 var emptyRequestConfigurer = func(r *http.Request) {}
 
+// get calls the handler, constructing an appropriate request and returning a simplified, already-read version of the
+// response
 func get(t *testing.T, endpoint http.HandlerFunc, rc func(r *http.Request)) consumedResponse {
 	recorder := httptest.NewRecorder()
 
@@ -229,6 +234,7 @@ func get(t *testing.T, endpoint http.HandlerFunc, rc func(r *http.Request)) cons
 	}
 }
 
+// consumedResponse is a simplified, already-read and error-checked version of the standard [http.Response] struct
 type consumedResponse struct {
 	statusCode int
 	body       string
@@ -236,6 +242,7 @@ type consumedResponse struct {
 	cookies    []*http.Cookie
 }
 
+// responseIsRedirectTo ascertains whether the given response is a HTTP redirect to the specified location
 func responseIsRedirectTo(r consumedResponse, to string) bool {
 	return r.statusCode == 303 && r.headers.Get("Location") == to
 }

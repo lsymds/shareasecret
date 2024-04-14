@@ -40,6 +40,8 @@ func (a *Application) mapRoutes() {
 	a.router.HandleFunc("POST /manage-secret/{managementID}/delete", a.handleDeleteSecret)
 }
 
+// ServeHTTP is the root [http.Handler] method for the application. It serves all application routes, wrapping them with
+// any required middlewares
 func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	loggingMiddleware(
 		recoveryMiddleware(
@@ -48,6 +50,7 @@ func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	).ServeHTTP(w, r)
 }
 
+// recoveryMiddleware recovers any panics, logging and redirecting the consumer to the oops page.
 func recoveryMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		l := zerolog.Ctx(r.Context())
@@ -63,6 +66,7 @@ func recoveryMiddleware(h http.Handler) http.Handler {
 	})
 }
 
+// loggingMiddleware creates and assigns to the request's context a logger with properties extracted from the request
 func loggingMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		l := log.With().
@@ -75,16 +79,20 @@ func loggingMiddleware(h http.Handler) http.Handler {
 	})
 }
 
+// serveFile serves an individual file over HTTP from a filesystem
 func serveFile(fs fs.FS, fileName string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFileFS(w, r, fs, fileName)
 	})
 }
 
+// handleGetIndex renders the root page for the application - this is where visitors are able to create secrets
+// (performed in the [handleCreateSecret] handler)
 func (a *Application) handleGetIndex(w http.ResponseWriter, r *http.Request) {
 	pageIndex(notificationsFromRequest(r, w)).Render(r.Context(), w)
 }
 
+// handleCreateSecret validates and persists a secret (consisting of encrypted ciphertext)
 func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request) {
 	l := zerolog.Ctx(r.Context())
 
@@ -153,10 +161,13 @@ func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// redirect the user to the manage secrets page
 	http.Redirect(w, r, fmt.Sprintf("/manage-secret/%s", managementID), http.StatusCreated)
 }
 
+// handleAccessSecretInterstitial presents a disclaimer to the visitor informing them that proceeding will use
+// a 'view' of the secret
+//
+// Accessing this page by itself does not constitute a view or modify a secret in anyway.
 func (a *Application) handleAccessSecretInterstitial(w http.ResponseWriter, r *http.Request) {
 	accessID := r.PathValue("accessID")
 
@@ -193,6 +204,8 @@ func (a *Application) handleAccessSecretInterstitial(w http.ResponseWriter, r *h
 	pageViewSecretInterstitial().Render(r.Context(), w)
 }
 
+// handleCreateSecretView creates a 'view' of a secret and is the POST accompaniment to the
+// [handleAccessSecretInterstitial] handler.
 func (a *Application) handleCreateSecretView(w http.ResponseWriter, r *http.Request) {
 	accessID := r.PathValue("accessID")
 
@@ -209,7 +222,8 @@ func (a *Application) handleCreateSecretView(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// create the secret view without a viewing date
+	// create the secret view without a viewing date, as this will be set when the viewing page route is actually
+	// called
 	rs, err := a.db.db.Exec(
 		`
 			INSERT INTO secret_views (secret_id, viewing_key, created_at)
@@ -242,10 +256,12 @@ func (a *Application) handleCreateSecretView(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// redirect them to the actual viewing page of the secret
+	// redirect them to the actual viewing page of the secret (which will then mark the secret view as viewed)
 	http.Redirect(w, r, fmt.Sprintf("/secret/%s/%s", accessID, key), http.StatusSeeOther)
 }
 
+// handleAccessSecret serves the 'decryption' page for a secret providing that a valid access identifier (192 bit) and
+// access key (32 bit) are provided in the request
 func (a *Application) handleAccessSecret(w http.ResponseWriter, r *http.Request) {
 	accessID := r.PathValue("accessID")
 	viewingKey := r.PathValue("viewingKey")
@@ -269,7 +285,8 @@ func (a *Application) handleAccessSecret(w http.ResponseWriter, r *http.Request)
 
 	defer tx.Rollback()
 
-	// retrieve the cipher text and secret view id for the relevant secret, or return an error if that secret cannot be found
+	// retrieve the cipher text and secret view id for the relevant secret, or return an error if that secret cannot be
+	// found
 	var cipherText string
 	var secretViewID int
 	var maxViews int
@@ -331,7 +348,6 @@ func (a *Application) handleAccessSecret(w http.ResponseWriter, r *http.Request)
 		notifications.warningMsg = "Maximum views reached. This secret will not be accessible again."
 	}
 
-	// commit the transaction
 	err = tx.Commit()
 	if err != nil {
 		l.Err(err).Msg("committing tx")
@@ -342,6 +358,8 @@ func (a *Application) handleAccessSecret(w http.ResponseWriter, r *http.Request)
 	pageViewSecret(cipherText, notifications).Render(r.Context(), w)
 }
 
+// handleManageSecret renders the management page of a secret and is intended for the original creator of the secret
+// to view
 func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request) {
 	managementID := r.PathValue("managementID")
 
@@ -384,6 +402,7 @@ func (a *Application) handleManageSecret(w http.ResponseWriter, r *http.Request)
 	).Render(r.Context(), w)
 }
 
+// handleDeleteSecret deletes a secret
 func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request) {
 	l := zerolog.Ctx(r.Context())
 	managementID := r.PathValue("managementID")
@@ -405,37 +424,41 @@ func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// badRequest sets the status code of the response to 400 and writes the error to the body
 func badRequest(err string, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusBadRequest)
 	w.Write([]byte(err))
 }
 
+// internalServerError sets the status code of the response to 500
 func internalServerError(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusInternalServerError)
 }
 
+// redirectToOopsPage configures the response to redirect to the /oops route which is a catch all error page for
+// any errors that weren't expected
 func redirectToOopsPage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/oops", http.StatusSeeOther)
 }
 
+// setFlashErr sets a flash cookie for errors with the content provided
 func setFlashErr(msg string, w http.ResponseWriter) {
 	setFlash("err", msg, w)
 }
 
-func setFlashWarning(msg string, w http.ResponseWriter) {
-	setFlash("warn", msg, w)
-}
-
+// setFlashSuccess sets a flash cookie for successes with the content provided
 func setFlashSuccess(msg string, w http.ResponseWriter) {
 	setFlash("success", msg, w)
 }
 
+// setFlash sets a flash cookie of the given name and message
 func setFlash(name string, msg string, w http.ResponseWriter) {
 	n := fmt.Sprintf("flash_%s", name)
 	m := base64.StdEncoding.EncodeToString([]byte(msg))
 	http.SetCookie(w, &http.Cookie{Name: n, Value: m, Path: "/", HttpOnly: true})
 }
 
+// notificationsFromRequest extracts a [notifications] instance from any flash cookies in the request
 func notificationsFromRequest(r *http.Request, w http.ResponseWriter) notifications {
 	return notifications{
 		errorMsg:   flash("err", r, w),
@@ -444,6 +467,7 @@ func notificationsFromRequest(r *http.Request, w http.ResponseWriter) notificati
 	}
 }
 
+// flash extracts a given flash message cookie from the request
 func flash(name string, r *http.Request, w http.ResponseWriter) string {
 	n := fmt.Sprintf("flash_%s", name)
 
@@ -475,6 +499,7 @@ func flash(name string, r *http.Request, w http.ResponseWriter) string {
 	return string(v)
 }
 
+// secureID generates a randomised hexadecimal identifier of the size in bytes from a secure cryptorandom source
 func secureID(size int) (string, error) {
 	b := make([]byte, size)
 

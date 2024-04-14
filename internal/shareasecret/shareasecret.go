@@ -6,8 +6,14 @@ import (
 	"net/http"
 )
 
+// deletionReasonExpired is a deletion reason used when secrets have exceeded their TTL (time to live)
 const deletionReasonExpired = "expired"
+
+// deletionReasonUserDeleted is a deletion reason used when a user actions the deletion themselves
 const deletionReasonUserDeleted = "user_deleted"
+
+// deletionReasonMaximumViewCountHit is a deletion reason used when the maximum number of views for a secret has been
+// hit or exceeded
 const deletionReasonMaximumViewCountHit = "maximum_view_count_hit"
 
 // Application is a wrapper/container for the "ShareASecret" project. All jobs and entry points hang off of this
