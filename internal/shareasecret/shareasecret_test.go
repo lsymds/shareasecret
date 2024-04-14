@@ -1,6 +1,7 @@
 package shareasecret
 
 import (
+	"database/sql"
 	"os"
 	"strings"
 	"testing"
@@ -27,6 +28,42 @@ func TestMain(m *testing.M) {
 	}()
 
 	m.Run()
+}
+
+func createSecret(t *testing.T, deletedAt time.Time, deletionReason string) (string, string) {
+	accessID, _ := secureID(24)
+	managementID, _ := secureID(24)
+
+	var dbDeletedAt sql.NullInt64
+	var dbDeletionReason sql.NullString
+
+	if (deletedAt == time.Time{}) {
+		dbDeletedAt = sql.NullInt64{}
+		dbDeletionReason = sql.NullString{}
+	} else {
+		dbDeletedAt = sql.NullInt64{Valid: true, Int64: deletedAt.UnixMilli()}
+		dbDeletionReason = sql.NullString{Valid: true, String: deletionReason}
+	}
+
+	_, err := app.db.db.Exec(
+		`
+			INSERT INTO secrets (access_id, management_id, maximum_views, ttl, cipher_text, deleted_at, deletion_reason, created_at)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		`,
+		accessID,
+		managementID,
+		1,
+		30,
+		"a.b.c",
+		dbDeletedAt,
+		dbDeletionReason,
+		time.Now().UnixMilli(),
+	)
+	if err != nil {
+		t.Errorf("creating secret: %v", err)
+	}
+
+	return accessID, managementID
 }
 
 func until(t *testing.T, try func() bool, maximumTries uint8, delay time.Duration) {
