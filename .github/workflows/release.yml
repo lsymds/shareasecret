@@ -68,7 +68,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/lsymds/shareasecret
+          images: ghcr.io/lsymds/shareasecret-${{ matrix.os }}${{ matrix.arch }}
 
       - name: Build Release
         run: ./build/ci/build_release.sh ${{ matrix.os }} ${{ matrix.arch }} ${{ github.ref_name }} false
