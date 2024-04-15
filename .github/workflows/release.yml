@@ -68,7 +68,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/lsymds/shareasecret-${{ matrix.os }}${{ matrix.arch }}
+          images: ghcr.io/lsymds/shareasecret-${{ matrix.arch }}
 
       - name: Build Release
         run: ./build/ci/build_release.sh ${{ matrix.os }} ${{ matrix.arch }} ${{ github.ref_name }} false
@@ -76,7 +76,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          provenance: false
           context: .
           file: ./build/package/Dockerfile
           platforms: ${{ matrix.os }}/${{ matrix.arch }}
