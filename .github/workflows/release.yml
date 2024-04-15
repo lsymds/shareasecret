@@ -64,6 +64,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+
       - name: Build Release
         run: ./build/ci/build_release.sh ${{ matrix.os }} ${{ matrix.arch }} ${{ github.ref_name }} false
 
@@ -74,6 +80,5 @@ jobs:
           file: ./build/package/Dockerfile
           platform: ${{ matrix.os }}/${{ matrix.arch }}
           push: true
-          tags:
-            - ghcr.io/lsymds/shareasecret:latest
-            - ghcr.io/lsymds/shareasecret:${{ github.ref_name }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
