@@ -2,7 +2,7 @@
 
 print_help()
 {
-  echo "usage: ./build/ci/build_release.sh operating_system architecture version"
+  echo "usage: ./build/ci/build_release.sh operating_system architecture version archive[true/false]"
   exit 1
 }
 
@@ -16,5 +16,8 @@ GOARCH=$2
 VERSION=$3
 FILE_NAME="shareasecret-$GOOS-$GOARCH-$VERSION"
 
-go build -o "./build/tmp/$FILE_NAME" -ldflags "-X main.version=$VERSION" . && \
+go build -o "./build/tmp/$FILE_NAME" -ldflags "-X main.version=$VERSION" .
+
+if [[ $4 != "false" ]]; then
   bzip2 "./build/tmp/$FILE_NAME"
+fi
