@@ -76,6 +76,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
+          provenance: false
           context: .
           file: ./build/package/Dockerfile
           platforms: ${{ matrix.os }}/${{ matrix.arch }}
