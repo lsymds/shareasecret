@@ -9,6 +9,6 @@ ENV SHAREASECRET_LISTENING_ADDR=0.0.0.0:8994
 
 USER ${UID}:${GID}
 
-COPY ./build/tmp/* /shareasecret
+COPY ./build/tmp/shareasecret-${TARGETOS}-${TARGETARCH}-* /shareasecret
 
 CMD [ "/shareasecret" ]

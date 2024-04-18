@@ -40,10 +40,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-    strategy:
-      matrix:
-        os: [linux]
-        arch: [386, amd64, arm, arm64]
     steps:
       - uses: actions/checkout@v4
 
@@ -69,21 +65,27 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/lsymds/shareasecret-${{ matrix.arch }}
+          images: ghcr.io/lsymds/shareasecret
           flavor: latest=false
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest,enable=${{ !contains(github.ref_name, '-alpha') && !contains(github.ref_name, '-beta') }}
 
-      - name: Build Release
-        run: ./build/ci/build_release.sh ${{ matrix.os }} ${{ matrix.arch }} ${{ github.ref_name }} false
+      - name: Build amd64
+        run: ./build/ci/build_release.sh linux amd64 ${{ github.ref_name }} false
+
+      - name: Build arm
+        run: ./build/ci/build_release.sh linux arm ${{ github.ref_name }} false
+
+      - name: Build arm64
+        run: ./build/ci/build_release.sh linux arm64 ${{ github.ref_name }} false
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./build/package/Dockerfile
-          platforms: ${{ matrix.os }}/${{ matrix.arch }}
+          platforms: linux/amd64, linux/arm, linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
