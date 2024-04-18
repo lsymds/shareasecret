@@ -1,5 +1,8 @@
 FROM debian:latest
 
+ARG TARGETOS
+ARG TARGETARCH
+
 VOLUME [ "/data" ]
 
 ENV UID=1000
