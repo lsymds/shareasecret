@@ -91,14 +91,28 @@ Requirements: `bzip2`
 
 ### Docker
 
-Coming soon...
+Requirements: Docker or Podman
+
+```
+docker run --rm -e SHAREASECRET_BASE_URL=http://127.0.0.1:8994 -p 8994:8994 ghcr.io/lsymds/shareasecret:latest
+```
+
+By default, the SQLite database that powers a shareasecret instance is persisted under the `/data` directory. A volume
+mount is created at the same location also. Feel free to override this with your own volume. The database files will
+be created automatically.
+
+The Docker image runs under a user and group id of 1000 by default. These can be overridden by setting the UID/GUID
+environment variables when running the container. If you are running rootless Podman and want them to map to your
+rootless user's ids, set them to 0:0 (root:root).
 
 ## Configuration
 
 ### Environment Variables
 
-shareasecret configuration is achieved entirely via environment variables. If you _really_ need to configure it via
-a file, place a `.env` file in your working directory.
+shareasecret configuration is achieved entirely via environment variables.
+
+If you are running via the executable and _really_ need to configure it via a file, place a `.env` file in your working
+directory.
 
 - `SHAREASECRET_DB_PATH` - the path to the database file. Will be created if it doesn't exist. Accompanying `shm` and
   `wal` files will be created alongside it.
