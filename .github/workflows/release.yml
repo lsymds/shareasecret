@@ -17,6 +17,8 @@ jobs:
         exclude:
           - os: darwin
             arch: arm
+          - os: windows
+            arch: arm
     steps:
       - uses: actions/checkout@v4
 
