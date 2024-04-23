@@ -7,7 +7,7 @@ import (
 	"io/fs"
 	"sort"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 //go:embed migrations/*.sql
@@ -20,7 +20,7 @@ type database struct {
 
 // newDatabase creates a SQLite connection and then runs any applicable migrations or seeders
 func newDatabase(connectionString string) (*database, error) {
-	con, err := sql.Open("sqlite3", connectionString)
+	con, err := sql.Open("sqlite", connectionString)
 	if err != nil {
 		return nil, err
 	}
