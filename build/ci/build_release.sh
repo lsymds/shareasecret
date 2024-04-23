@@ -11,8 +11,9 @@ if [[ $1 = "" ]] || [[ $2 = "" ]] || [[ $3 = "" ]]; then
   exit 1
 fi
 
-GOOS=$1
-GOARCH=$2
+export GOOS=$1
+export GOARCH=$2
+
 VERSION=$3
 FILE_NAME="shareasecret-$GOOS-$GOARCH-$VERSION"
 
