@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/lsymds/go-utils/pkg/http/middleware"
 	"github.com/lsymds/staticmodtimefs"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 // mapRoutes maps all HTTP routes for the application.
@@ -43,40 +43,15 @@ func (a *Application) mapRoutes() {
 // ServeHTTP is the root [http.Handler] method for the application. It serves all application routes, wrapping them with
 // any required middlewares
 func (a *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	loggingMiddleware(
-		recoveryMiddleware(
+	middleware.Logging(
+		middleware.Recovery(
 			a.router,
-		),
-	).ServeHTTP(w, r)
-}
-
-// recoveryMiddleware recovers any panics, logging and redirecting the consumer to the oops page.
-func recoveryMiddleware(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		l := zerolog.Ctx(r.Context())
-
-		defer func() {
-			if err := recover(); err != nil {
-				l.Error().Any("panic", err).Msg("recovered from panic")
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				http.Redirect(w, r, "/oops", http.StatusSeeOther)
-			}
-		}()
-
-		h.ServeHTTP(w, r)
-	})
-}
-
-// loggingMiddleware creates and assigns to the request's context a logger with properties extracted from the request
-func loggingMiddleware(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		l := log.With().
-			Str("url", r.URL.String()).
-			Str("method", r.Method)
-
-		r = r.WithContext(l.Logger().WithContext(r.Context()))
-
-		h.ServeHTTP(w, r)
-	})
+			}),
+		),
+		nil,
+	).ServeHTTP(w, r)
 }
 
 // serveFile serves an individual file over HTTP from a filesystem
