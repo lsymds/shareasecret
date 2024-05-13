@@ -11,7 +11,11 @@ import (
 var app *Application
 
 func TestMain(m *testing.M) {
-	a, err := NewApplication("file:shareasecret_test.db", "http://127.0.0.1:8999", os.DirFS("../web/"))
+	config := &Configuration{}
+	config.Database.Path = "shareasecret_test.db"
+	config.Server.BaseUrl = "http://127.0.0.1:8999"
+
+	a, err := NewApplication(config, os.DirFS("../web/"))
 	if err != nil {
 		panic(err)
 	}
