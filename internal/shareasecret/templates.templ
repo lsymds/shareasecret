@@ -100,6 +100,7 @@ templ pageIndex(c notifications, ipRestricted bool) {
 			} else {
 				<section>
 					<h1>shareasecret</h1>
+					@componentNotifications(c)
 					<p>
 						this shareasecret instance is private and only authorised users are able to create secrets. secrets created
 						by those users are still able to be viewed and managed by everyone.
