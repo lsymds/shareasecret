@@ -14,6 +14,7 @@ func TestMain(m *testing.M) {
 	config := &Configuration{}
 	config.Database.Path = "shareasecret_test.db"
 	config.Server.BaseUrl = "http://127.0.0.1:8999"
+	config.SecretCreationRestrictions.IPAddresses = []string{"127.0.0.1"}
 
 	a, err := NewApplication(config, os.DirFS("../web/"))
 	if err != nil {

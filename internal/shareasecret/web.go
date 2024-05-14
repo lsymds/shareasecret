@@ -64,12 +64,21 @@ func serveFile(fs fs.FS, fileName string) http.Handler {
 // handleGetIndex renders the root page for the application - this is where visitors are able to create secrets
 // (performed in the [handleCreateSecret] handler)
 func (a *Application) handleGetIndex(w http.ResponseWriter, r *http.Request) {
-	pageIndex(notificationsFromRequest(r, w)).Render(r.Context(), w)
+	ns := notificationsFromRequest(r, w)
+	ipRestricted := !requestingIPCanCreateSecret(a.config, r)
+
+	pageIndex(ns, ipRestricted).Render(r.Context(), w)
 }
 
 // handleCreateSecret validates and persists a secret (consisting of encrypted ciphertext)
 func (a *Application) handleCreateSecret(w http.ResponseWriter, r *http.Request) {
 	l := zerolog.Ctx(r.Context())
+
+	// redirect to the home page if requester is not permitted to create secrets
+	if !requestingIPCanCreateSecret(a.config, r) {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 
 	secret := ""
 	ttl := 0
@@ -483,4 +492,32 @@ func secureID(size int) (string, error) {
 	}
 
 	return hex.EncodeToString(b), nil
+}
+
+// requestingIPCanCreateSecret identifies whether the request was made from an IP address that has been specifically
+// allowed to create secrets.
+func requestingIPCanCreateSecret(config *Configuration, r *http.Request) bool {
+	if len(config.SecretCreationRestrictions.IPAddresses) == 0 {
+		return true
+	}
+
+	ips := strings.Split(r.Header.Get("X-Forwarded-For"), ",")
+	for _, ip := range ips {
+		if ip == "" {
+			continue
+		}
+
+		for _, allowedIP := range config.SecretCreationRestrictions.IPAddresses {
+			a := strings.TrimSpace(ip)
+			b := strings.TrimSpace(allowedIP)
+
+			if a == "" || b == "" {
+				continue
+			} else if a == b {
+				return true
+			}
+		}
+	}
+
+	return false
 }

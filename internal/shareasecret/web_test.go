@@ -12,6 +12,31 @@ import (
 )
 
 func TestSecretCreation(t *testing.T) {
+	t.Run("unable to view create secret page if not valid requesting ip", func(t *testing.T) {
+		if r := get(t, app.handleGetIndex, func(r *http.Request) { r.Header.Del("X-Forwarded-For") }); r.statusCode != 200 {
+			t.Errorf("wanted 200 status code, got %v", r.statusCode)
+		} else if !strings.Contains(r.body, "instance is private") {
+			t.Errorf("wanted 'instance is private' in body")
+		} else if strings.Contains(r.body, "create a secret") {
+			t.Errorf("did not expect 'create a secret' to be in body")
+		}
+	})
+
+	t.Run("redirects back to home page if not valid requesting ip to create secret", func(t *testing.T) {
+		r := post(
+			t,
+			app.handleCreateSecret,
+			"ttl=30&encryptedSecret=a.b.c&maxViews=1",
+			func(r *http.Request) { r.Header.Del("X-Forwarded-For") },
+		)
+
+		if r.statusCode != 303 {
+			t.Errorf("wanted 303 status code, got %v", r.statusCode)
+		} else if h := r.headers.Get("Location"); h != "/" {
+			t.Errorf("expected redirect to /, got %v", h)
+		}
+	})
+
 	t.Run("bad request for invalid ciphertext", func(t *testing.T) {
 		if r := post(t, app.handleCreateSecret, "ttl=30&encryptedSecret=a&maxViews=1", emptyRequestConfigurer); r.statusCode != 400 {
 			t.Errorf("wanted 400 status code, got %v", r.statusCode)
@@ -39,7 +64,7 @@ func TestSecretCreation(t *testing.T) {
 	t.Run("creates the secret and redirects correctly", func(t *testing.T) {
 		r := post(t, app.handleCreateSecret, "ttl=30&encryptedSecret=a.b.c&maxViews=1", emptyRequestConfigurer)
 		if r.statusCode != 201 {
-			t.Errorf("wanted 303 status code, got %v", r.statusCode)
+			t.Errorf("wanted 201 status code, got %v", r.statusCode)
 		} else if _, ok := r.headers["Location"]; !ok {
 			t.Errorf("expected Location response header to be present")
 		}
@@ -186,7 +211,7 @@ func post(t *testing.T, endpoint http.HandlerFunc, body string, rc func(r *http.
 	if err != nil {
 		t.Error()
 	}
-
+	r.Header.Add("X-Forwarded-For", "127.0.0.1")
 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	rc(r)
 
@@ -217,6 +242,7 @@ func get(t *testing.T, endpoint http.HandlerFunc, rc func(r *http.Request)) cons
 	if err != nil {
 		t.Error()
 	}
+	r.Header.Add("X-Forwarded-For", "127.0.0.1")
 	rc(r)
 
 	endpoint.ServeHTTP(recorder, r)

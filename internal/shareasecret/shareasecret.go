@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -57,6 +58,10 @@ func (c *Configuration) PopulateFromEnv() error {
 		c.Server.ListeningAddr = "127.0.0.1:8994"
 	}
 
+	if cr := strings.TrimSpace(os.Getenv("SHAREASECRET_SECRET_CREATION_IP_RESTRICTIONS")); cr != "" {
+		c.SecretCreationRestrictions.IPAddresses = strings.Split(cr, ",")
+	}
+
 	return nil
 }
 
@@ -64,6 +69,7 @@ func (c *Configuration) PopulateFromEnv() error {
 // struct.
 type Application struct {
 	db        *database
+	config    *Configuration
 	router    *http.ServeMux
 	baseURL   string
 	webAssets fs.FS
@@ -78,6 +84,7 @@ func NewApplication(config *Configuration, webAssets fs.FS) (*Application, error
 
 	application := &Application{
 		db:        db,
+		config:    config,
 		router:    http.NewServeMux(),
 		baseURL:   config.Server.BaseUrl,
 		webAssets: webAssets,
