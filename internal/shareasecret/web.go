@@ -391,9 +391,10 @@ func (a *Application) handleDeleteSecret(w http.ResponseWriter, r *http.Request)
 	l := zerolog.Ctx(r.Context())
 	managementID := r.PathValue("managementID")
 
-	// delete the secret, returning the user to the manage secret page with an error message if that fails
+	// delete the secret (if it hasn't already been deleted), returning the user to the manage secret page with an error
+	// message if that fails
 	_, err := a.db.db.Exec(
-		"UPDATE secrets SET deleted_at = ?, deletion_reason = ?, cipher_text = NULL WHERE management_id = ?",
+		"UPDATE secrets SET deleted_at = ?, deletion_reason = ?, cipher_text = NULL WHERE management_id = ? AND deleted_at IS NULL",
 		time.Now().UnixMilli(),
 		deletionReasonUserDeleted,
 		managementID,
