@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM gcr.io/distroless/base-debian12:latest
 
 ARG TARGETOS
 ARG TARGETARCH
