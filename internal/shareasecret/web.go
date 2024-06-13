@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -498,25 +499,26 @@ func secureID(size int) (string, error) {
 // requestingIPCanCreateSecret identifies whether the request was made from an IP address that has been specifically
 // allowed to create secrets.
 func requestingIPCanCreateSecret(config *Configuration, r *http.Request) bool {
-	if len(config.SecretCreationRestrictions.IPAddresses) == 0 {
+	if len(config.SecretCreationRestrictions.IPAddresses.FixedIPs) == 0 && len(config.SecretCreationRestrictions.IPAddresses.CIDRs) == 0 {
 		return true
 	}
 
-	ips := strings.Split(r.Header.Get("X-Forwarded-For"), ",")
-	for _, ip := range ips {
-		if ip == "" {
-			continue
+	sourceIP := net.ParseIP(strings.Split(r.Header.Get("X-Forwarded-For"), ",")[0])
+	if sourceIP == nil {
+		return false
+	}
+
+	// check if any IPs match directly
+	for _, ip := range config.SecretCreationRestrictions.IPAddresses.FixedIPs {
+		if ip.Equal(sourceIP) {
+			return true
 		}
+	}
 
-		for _, allowedIP := range config.SecretCreationRestrictions.IPAddresses {
-			a := strings.TrimSpace(ip)
-			b := strings.TrimSpace(allowedIP)
-
-			if a == "" || b == "" {
-				continue
-			} else if a == b {
-				return true
-			}
+	// check if any specified CIDRs contain the ip address
+	for _, cidr := range config.SecretCreationRestrictions.IPAddresses.CIDRs {
+		if cidr.Contains(sourceIP) {
+			return true
 		}
 	}
 

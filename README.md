@@ -120,6 +120,7 @@ directory.
 - `SHAREASECRET_LISTENING_ADDR` - the address (including port) that the server will listen on. Defaults to
   `127.0.0.1:8994`.
 - `SHAREASECRET_SECRET_CREATION_IP_RESTRICTIONS` - a string containing a comma separated list of IP addresses (v4 or v6)
-  that are permitted to create secrets. Leaving this empty or not specifying it (the default) will result in an instance
-  where anyone can create secrets. Requesting IP addresses are sourced from the `X-Forwarded-For` header. If you need to
-  customise this (i.e. to use Cloudflare's `CF-Connecting-IP` instead), use a reverse proxy such as Caddy or Nginx.
+  and/or CIDRs (i.e. `150.48.32.0/24` or `fd00::/8`) that are permitted to create secrets. Leaving this empty or not
+  specifying it (the default) will result in an instance where anyone can create secrets. Requesting IP addresses are
+  sourced from the `X-Forwarded-For` header. If you need to customise this (i.e. to use Cloudflare's `CF-Connecting-IP`
+  instead), use a reverse proxy such as Caddy or Nginx.

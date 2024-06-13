@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -31,7 +32,10 @@ type Configuration struct {
 		ListeningAddr string
 	}
 	SecretCreationRestrictions struct {
-		IPAddresses []string
+		IPAddresses struct {
+			FixedIPs []net.IP
+			CIDRs    []net.IPNet
+		}
 	}
 }
 
@@ -59,7 +63,28 @@ func (c *Configuration) PopulateFromEnv() error {
 	}
 
 	if cr := strings.TrimSpace(os.Getenv("SHAREASECRET_SECRET_CREATION_IP_RESTRICTIONS")); cr != "" {
-		c.SecretCreationRestrictions.IPAddresses = strings.Split(cr, ",")
+		for _, v := range strings.Split(cr, ",") {
+			v = strings.TrimSpace(v)
+			if v == "" {
+				continue
+			}
+
+			// a slash in the IP address consistutes a CIDR i.e. fe80::/8 or 192.168.1.0/24
+			if strings.Contains(v, "/") {
+				_, nw, err := net.ParseCIDR(v)
+				if err != nil {
+					return fmt.Errorf("invalid CIDR (%v) in SHAREASECRET_SECRET_CREATION_IP_RESTRICTIONS: %w", v, err)
+				}
+
+				c.SecretCreationRestrictions.IPAddresses.CIDRs = append(c.SecretCreationRestrictions.IPAddresses.CIDRs, *nw)
+			} else {
+				if ip := net.ParseIP(v); ip == nil {
+					return fmt.Errorf("invalid ip in SHAREASECRET_SECRET_CREATION_IP_RESTRICTIONS: %v", v)
+				} else {
+					c.SecretCreationRestrictions.IPAddresses.FixedIPs = append(c.SecretCreationRestrictions.IPAddresses.FixedIPs, ip)
+				}
+			}
+		}
 	}
 
 	return nil

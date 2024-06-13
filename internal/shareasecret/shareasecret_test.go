@@ -2,6 +2,7 @@ package shareasecret
 
 import (
 	"database/sql"
+	"net"
 	"os"
 	"strings"
 	"testing"
@@ -11,10 +12,12 @@ import (
 var app *Application
 
 func TestMain(m *testing.M) {
+	_, nw, _ := net.ParseCIDR("127.0.0.0/8")
+
 	config := &Configuration{}
 	config.Database.Path = "shareasecret_test.db"
 	config.Server.BaseUrl = "http://127.0.0.1:8999"
-	config.SecretCreationRestrictions.IPAddresses = []string{"127.0.0.1"}
+	config.SecretCreationRestrictions.IPAddresses.CIDRs = []net.IPNet{*nw}
 
 	a, err := NewApplication(config, os.DirFS("../web/"))
 	if err != nil {
