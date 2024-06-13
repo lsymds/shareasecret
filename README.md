@@ -123,4 +123,4 @@ directory.
   and/or CIDRs (i.e. `150.48.32.0/24` or `fd00::/8`) that are permitted to create secrets. Leaving this empty or not
   specifying it (the default) will result in an instance where anyone can create secrets. Requesting IP addresses are
   sourced from the `X-Forwarded-For` header. If you need to customise this (i.e. to use Cloudflare's `CF-Connecting-IP`
-  instead), use a reverse proxy such as Caddy or Nginx.
+  instead) or want to prevent trivial IP address spoofing, use a reverse proxy such as Caddy or Nginx to set the header.
