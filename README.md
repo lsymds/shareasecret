@@ -122,5 +122,5 @@ directory.
 - `SHAREASECRET_SECRET_CREATION_IP_RESTRICTIONS` - a string containing a comma separated list of IP addresses (v4 or v6)
   and/or CIDRs (i.e. `150.48.32.0/24` or `fd00::/8`) that are permitted to create secrets. Leaving this empty or not
   specifying it (the default) will result in an instance where anyone can create secrets. Requesting IP addresses are
-  sourced from the `X-Forwarded-For` header. If you need to customise this (i.e. to use Cloudflare's `CF-Connecting-IP`
-  instead) or want to prevent trivial IP address spoofing, use a reverse proxy such as Caddy or Nginx to set the header.
+  sourced from the `X-Forwarded-For` header.
+  - **You MUST ensure you are setting the `X-Forwarded-For` header from a trusted reverse proxy such as Caddy or NGINX. The IP is easily spoofable from clients making requests directly.** For more information, read: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For#security_and_privacy_concerns
