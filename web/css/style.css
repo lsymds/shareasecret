@@ -4,31 +4,60 @@
   --pico-icon-loading: url("/static/images/spinner_icon.svg");
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 h1 {
   border-bottom: 6px solid var(--pico-primary);
 }
 
-.container {
-  min-width: 400px;
-  padding: 0 12px 12px 12px;
-  margin: 0;
+@media screen and (min-width: 768px) {
+
+  html,
+  body {
+    height: 100%;
+  }
 }
 
-  @media screen and (min-width: 768px) {
-    .container {
-      padding: 0 24px 24px 24px;
-      width: 720px;
-    }
+
+body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--pico-code-background-color);
+}
+
+.container {
+  padding: 12px;
+  margin: 0;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  border-radius: var(--pico-border-radius);
+  background: var(--pico-background-color);
+}
+
+@media screen and (min-width: 768px) {
+  .container {
+    padding: 36px;
+    width: 720px;
   }
+}
 
 header {
   display: inline-block !important;
   width: auto !important;
   background: var(--pico-primary);
-  margin-bottom: 36px;
-  padding: 12px;
+  margin-bottom: 20px;
+  padding: 12px 24px;
   color: white;
   font-weight: bold;
+  font-size: 20px;
+  border: var(--pico-border-width) solid var(--pico-border-color);
+  border-radius: var(--pico-border-radius);
 }
 
 section {
@@ -45,80 +74,75 @@ button {
   text-transform: uppercase;
   font-weight: bold !important;
   font-size: 14px !important;
+  margin: 0 !important;
 }
 
-  button.input-action {
-    --pico-background-color: var(--pico-form-element-background-color);
-    --pico-border-color: var(--pico-form-element-border-color);
-    --pico-color: var(--pico-form-element-color);
-    --pico-box-shadow: none;
-    border: var(--pico-border-width) solid var(--pico-border-color);
-    border-radius: var(--pico-border-radius);
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    outline: 0;
-    background-color: var(--pico-background-color);
-    box-shadow: var(--pico-box-shadow);
-    color: var(--pico-color);
-    font-weight: var(--pico-font-weight);
-    transition: background-color var(--pico-transition), border-color var(--pico-transition), color var(--pico-transition), box-shadow var(--pico-transition);
-  }
-
-    button.input-action:hover {
-      background: #F1F1F1;
-    }
-
-  button.wide {
-    width: 100%;
-  }
-
-.notifications {
+button.input-action {
+  --pico-background-color: var(--pico-form-element-background-color);
+  --pico-border-color: var(--pico-form-element-border-color);
+  --pico-color: var(--pico-form-element-color);
+  --pico-box-shadow: none;
+  border: var(--pico-border-width) solid var(--pico-border-color);
+  border-radius: var(--pico-border-radius);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  outline: 0;
+  background-color: var(--pico-background-color);
+  box-shadow: var(--pico-box-shadow);
+  color: var(--pico-color);
+  font-weight: var(--pico-font-weight);
+  transition: background-color var(--pico-transition), border-color var(--pico-transition), color var(--pico-transition), box-shadow var(--pico-transition);
 }
 
-  .notifications .notifications__notification {
-    padding: 6px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: bold;
-  }
-
-    .notifications .notifications__notification.notifications__notification--success {
-      border-left: 6px solid #A5D601;
-      color: #394D00;
-    }
-
-    .notifications .notifications__notification.notifications__notification--warning {
-      border-left: 6px solid #FEB670;
-      color: #AD6400;
-    }
-
-    .notifications .notifications__notification.notifications__notification--error {
-      border-left: 6px solid #F5A390;
-      color: #861D13;
-    }
-
-    .notifications .notifications__notification.notifications__notification--hidden {
-      display: none;
-    }
-
-.create-secret-form {
+button.input-action:hover {
+  background: #F1F1F1;
 }
 
+button.wide {
+  width: 100%;
+}
+
+.notifications .notifications__notification {
+  padding: 6px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+}
+
+.notifications .notifications__notification.notifications__notification--success {
+  border-left: 6px solid #A5D601;
+  color: #394D00;
+}
+
+.notifications .notifications__notification.notifications__notification--warning {
+  border-left: 6px solid #FEB670;
+  color: #AD6400;
+}
+
+.notifications .notifications__notification.notifications__notification--error {
+  border-left: 6px solid #F5A390;
+  color: #861D13;
+}
+
+.notifications .notifications__notification.notifications__notification--hidden {
+  display: none;
+}
+
+.create-secret-form .create-secret-form__options {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 12px;
+}
+
+@media screen and (min-width: 768px) {
   .create-secret-form .create-secret-form__options {
-      display: grid;
-      grid-template-columns: 1fr;
-      column-gap: 12px;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 
-  @media screen and (min-width: 768px) {
-    .create-secret-form .create-secret-form__options {
-      grid-template-columns: 1fr 1fr 1fr;
-    }
-
-    .create-secret-form .create-secret-form__option-encryption-key {
-        grid-column-start: 1;
-        grid-column-end: 3;
-    }
+  .create-secret-form .create-secret-form__option-encryption-key {
+    grid-column-start: 1;
+    grid-column-end: 3;
   }
+}
